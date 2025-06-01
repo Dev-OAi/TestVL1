@@ -72,7 +72,7 @@ html {
     padding: 0 1.5rem 0 2rem;
     height: var(--header-height);
     display: flex;
-    align-items: left;
+    align-items: stretch;
     position: relative;
     top: 0;
     z-index: 1000;
