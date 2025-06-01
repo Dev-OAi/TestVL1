@@ -1,1 +1,1725 @@
-test index html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccountFinder Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for sticky table headers and smooth transitions */
+        th.sticky-left, td.sticky-left {
+            position: sticky;
+            left: 0;
+            background: inherit; /* Will inherit from parent, e.g., thead or tbody */
+            z-index: 10; /* Ensure it's above other cells but below sticky header if needed */
+        }
+        thead th.sticky-left {
+            z-index: 20; /* Higher z-index for header cells */
+        }
+        .option-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .option-card.selected {
+            border-color: #2563eb; /* blue-600 */
+            background-color: #eff6ff; /* blue-50 */
+            box-shadow: 0 0 0 2px #2563eb; /* Ring effect */
+        }
+        /* Added for questionnaire sidebar list items */
+        .sidebar-item {
+            cursor: pointer;
+            padding: 0.75rem 1rem; /* p-3 px-4 */
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s ease-in-out;
+            display: flex; /* For icon alignment */
+            align-items: center;
+        }
+        .sidebar-item:hover {
+            background-color: #e0e7ff; /* blue-100 */
+        }
+        .sidebar-item.selected {
+            background-color: #bfdbfe; /* blue-200 */
+            font-weight: 600; /* semibold */
+            color: #1d4ed8; /* blue-700 */
+        }
+        .sidebar-item.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f3f4f6; /* gray-100 */
+            color: #9ca3af; /* gray-400 */
+        }
+
+        /* Snackbar specific styles */
+        #snackbar-container {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000; /* Ensure it's on top */
+            pointer-events: none; /* Allows clicks to pass through */
+        }
+        .snackbar {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .snackbar.show {
+            opacity: 1;
+        }
+        /* Navigation Drawer Styles (Compact Screens) */
+        .nav-drawer {
+            position: fixed;
+            top: 0;
+            left: -300px; /* Start off-screen */
+            width: 300px;
+            height: 100%;
+            background-color: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 1050;
+            transition: left 0.3s ease-in-out;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-drawer.open {
+            left: 0;
+        }
+        .nav-drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1040;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0s 0.3s;
+        }
+        .nav-drawer-overlay.open {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .nav-drawer-header {
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+        }
+        .nav-drawer-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+        .nav-drawer-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem; /* rounded-md */
+            color: #374151; /* gray-700 */
+            font-weight: 500; /* medium */
+            transition: background-color 0.2s, color 0.2s;
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+        }
+        .nav-drawer-item:hover, .nav-drawer-item.active {
+            background-color: #e0e7ff; /* blue-100 */
+            color: #1d4ed8; /* blue-700 */
+        }
+        .nav-drawer-item svg {
+            margin-right: 0.75rem;
+            width: 1.25rem; /* w-5 */
+            height: 1.25rem; /* h-5 */
+        }
+
+        /* Navigation Rail Styles (Medium+ Screens) */
+        #nav-rail {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            background-color: #f0f4f9; /* Material You surface - slightly off-white/light blueish gray */
+            width: 80px; /* Collapsed width */
+            padding-top: 8px; /* Reduced top padding */
+            display: none; /* Hidden by default, shown by media query */
+            flex-direction: column;
+            align-items: center;
+            z-index: 1000; /* Below drawer overlay if both were somehow visible */
+            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border-right: 1px solid #dde3ea; /* Softer border */
+        }
+        #nav-rail.expanded {
+            width: 256px;
+            align-items: flex-start; /* Align items to start when expanded */
+        }
+
+        .nav-rail-toggle-container { /* Container for the toggle button */
+            width: 100%;
+            display: flex;
+            justify-content: flex-start; /* Align button to the left */
+            padding: 0 16px; /* Horizontal padding for the button */
+            margin-bottom: 12px; /* Space below toggle */
+            box-sizing: border-box;
+        }
+
+        .nav-rail-toggle-button {
+            background: none;
+            border: none;
+            padding: 12px; /* Clickable area */
+            cursor: pointer;
+            color: #43484E; /* On-surface-variant */
+            border-radius: 50%;
+        }
+         .nav-rail-toggle-button:hover {
+            background-color: rgba(0,0,0,0.04);
+        }
+
+
+        .nav-rail-item {
+            display: flex;
+            align-items: center;
+            width: 56px; /* Fixed width for collapsed item container */
+            height: 56px; /* Fixed height for collapsed item container */
+            justify-content: center; /* Center icon in collapsed state */
+            margin: 4px auto; /* Center the item itself horizontally */
+            border-radius: 28px; /* Fully rounded "pill" shape */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #43484E; /* Material You On Surface Variant */
+            overflow: hidden;
+            text-decoration: none;
+        }
+        #nav-rail.expanded .nav-rail-item {
+            width: calc(100% - 32px); /* Full width minus padding when expanded */
+            margin: 4px 16px; /* Adjust margin for expanded state */
+            padding: 0 16px 0 12px; /* Padding for icon and text */
+            justify-content: flex-start; /* Align content to start */
+            height: 48px; /* Slightly smaller height for expanded items */
+            border-radius: 24px;
+        }
+
+        .nav-rail-item svg {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            transition: margin 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #nav-rail.expanded .nav-rail-item svg {
+            margin-right: 12px;
+        }
+
+        .nav-rail-item-label {
+            display: none;
+            white-space: nowrap;
+            font-weight: 500; /* Medium */
+            font-size: 0.875rem; /* 14px */
+            line-height: 1.25rem; /* 20px */
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out 0.1s; /* Delay opacity transition */
+        }
+        #nav-rail.expanded .nav-rail-item-label {
+            display: inline;
+            opacity: 1;
+        }
+        .nav-rail-item:hover {
+            background-color: #e1e3e9; /* Slightly darker hover */
+        }
+        .nav-rail-item.active {
+            background-color: #d0e4ff; /* Material You Secondary Container color (example) */
+            color: #001d36; /* Material You On Secondary Container (example) */
+        }
+         #nav-rail.expanded .nav-rail-item.active {
+            /* Optionally different active style for expanded */
+        }
+
+
+        /* App content adjustments based on rail state */
+        #app-container {
+            transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-top: 0; /* Ensure no extra space if header is part of #app */
+        }
+
+        @media (min-width: 768px) { /* md breakpoint (Tailwind's default) */
+            #nav-rail {
+                display: flex;
+            }
+            .nav-drawer-toggle-header { /* Hamburger in header for compact screens */
+                display: none;
+            }
+            /* Default margin for collapsed rail */
+            #app-container {
+                margin-left: 80px;
+            }
+            #app-container.rail-expanded {
+                margin-left: 256px;
+            }
+        }
+        @media (max-width: 767.98px) { /* Below md breakpoint */
+            #app-container {
+                margin-left: 0 !important; /* Ensure no margin from rail on small screens */
+            }
+            #nav-rail {
+                display: none !important; /* Ensure rail is hidden */
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation Rail (for medium screens and up) -->
+    <nav id="nav-rail">
+        <div class="nav-rail-toggle-container">
+            <button id="nav-rail-toggle" data-action="toggle-nav-rail" class="nav-rail-toggle-button" aria-label="Toggle navigation rail">
+                <!-- Icon will be set by JS -->
+            </button>
+        </div>
+        <a href="#" data-action="navigate-to-rail-home" class="nav-rail-item">
+            <span class="nav-rail-icon-placeholder"></span> <!-- Icon set by JS -->
+            <span class="nav-rail-item-label">Home</span>
+        </a>
+        <a href="#" data-action="navigate-to-rail-questionnaire" class="nav-rail-item">
+            <span class="nav-rail-icon-placeholder"></span>
+            <span class="nav-rail-item-label">Questionnaire</span>
+        </a>
+        <a href="#" data-action="navigate-to-rail-settings" class="nav-rail-item">
+            <span class="nav-rail-icon-placeholder"></span>
+            <span class="nav-rail-item-label">Settings</span>
+        </a>
+    </nav>
+
+    <!-- Navigation Drawer (for compact screens) -->
+    <div id="nav-drawer" class="nav-drawer">
+        <div class="nav-drawer-header">
+            <h2 class="text-xl font-semibold text-gray-800">Menu</h2>
+            <button data-action="toggle-nav-drawer" class="p-1 text-gray-600 hover:text-blue-600 rounded-md hover:bg-gray-100">
+                <!-- Icon will be set by JS -->
+            </button>
+        </div>
+        <nav class="nav-drawer-content">
+            <a href="#" data-action="navigate-to-drawer-home" class="nav-drawer-item">
+                <!-- Icon will be set by JS --> Home
+            </a>
+            <a href="#" data-action="navigate-to-drawer-questionnaire" class="nav-drawer-item">
+                <!-- Icon will be set by JS --> Questionnaire
+            </a>
+            <a href="#" data-action="navigate-to-drawer-settings" class="nav-drawer-item">
+                <!-- Icon will be set by JS --> Settings
+            </a>
+        </nav>
+    </div>
+    <div id="nav-drawer-overlay" class="nav-drawer-overlay" data-action="toggle-nav-drawer"></div>
+
+    <!-- Main App Container -->
+    <div id="app-container">
+        <div id="app" class="min-h-screen"></div>
+    </div>
+
+    <div id="snackbar-container"></div>
+
+    <script>
+        // --- Mock Data (These will be replaced by CSV data if loaded successfully) ---
+        // Ensuring these are `let` so they can be reassigned by CSV
+        let productsData = [
+            { name: "Preferred Checking (Line of Credit)", targetCustomer: "Businesses needing overdraft protection", features: "Line of Credit for the exact amount of overdraft. Does not cover Zelle Transactions.", serviceCharge: "$25 annual fee.", details: "Fixed 16.9% APR. Term: 48 months. Minimum Loan: $500. Maximum Loan: $25,000. Payment Options: Auto-debit, Online Banking, In-Person at Branch.", productCategory: "business" },
+            { name: "Digital Solutions Platform", targetCustomer: "Valley Business Account Holders", features: "View Paper Statements; View copies of paid checks; Stop Check Payment; Schedule transfers; Open additional accounts; View entire financial portfolio; Enable Push Notifications; Secure messaging; Card Management.", serviceCharge: "Included with business accounts", details: "Business Standard Deposit Limits and Increased Deposit Limits available. Sign into the HCM Portal for more details.", productCategory: "business" },
+            { name: "Valley Direct Deposit Payroll", targetCustomer: "Business customers wanting to provide direct deposit", features: "Payroll electronically deposited into Valley or another bank on the day due. Deposit appears on monthly statement. Immediate availability.", serviceCharge: "Monthly maintenance fee (contact Commercial Services for pricing).", details: "A Business Service/Treasury Solution for managing employee payments efficiently.", productCategory: "business" },
+            { name: "Small Business Checking", targetCustomer: "Small Businesses with basic needs", features: "200 free transactions; Online banking; Mobile deposit", serviceCharge: "$25/month", details: "Good for startups and sole proprietors.", productCategory: "business" },
+            { name: "Business Banking Checking", targetCustomer: "Small-Mid Sized Businesses", features: "400 free transactions; First five incoming/outgoing domestic wires free; $15 monthly fee if utilizing wire module", serviceCharge: "$25/month", details: "Ideal for businesses with moderate transaction volume.", productCategory: "business" },
+            { name: "Business Checking Plus", targetCustomer: "Mid-Large Businesses", features: "1000 free transactions; Higher cash deposit limits; Dedicated support", serviceCharge: "$50/month", details: "For established businesses with higher volume.", productCategory: "business" },
+            { name: "Women in Business Checking", targetCustomer: "Female Business Owners", features: "500 free transactions; Lower fees; Access to women's business networks; Mentorship programs", serviceCharge: "$10/month", details: "Tailored for female entrepreneurs.", productCategory: "business" },
+            { name: "Non-Profit Checking", targetCustomer: "Non-Profit Organizations", features: "Unlimited transactions; No monthly fee with minimum balance; Specialized support", serviceCharge: "$0/month with $500 average daily balance", details: "Designed for non-profit entities.", productCategory: "business" },
+            { name: "Personal Savings", targetCustomer: "Individuals", features: "High interest rate; Online transfers", serviceCharge: "$5/month", details: "Savings for personal use.", productCategory: "personal" },
+            { name: "Student Account", targetCustomer: "Students", features: "No monthly fees; Free ATM withdrawals", serviceCharge: "$0/month", details: "Perfect for students.", productCategory: "personal" }
+        ];
+
+        let accountComparisonData = [
+            { feature: 'Monthly Fee', values: ['$25', '$25', '$50', '$10', '$0', '$25'] },
+            { feature: 'Required Balance to Waive Fee', values: ['$1,000 Daily Balance', '$2,500 Daily Balance', '$10,000 Average Daily Balance', '$1,500 Average Daily Balance', '$500 Average Daily Balance', '$0 None'] },
+            { feature: 'Free Transactions', values: ['300/month', '500/month', '1,000/month', '500/month', 'Unlimited', '10,000/month'] },
+            { feature: 'Additional Transaction Fee', values: ['$0.50/item over 200', '$0.50/item over 400', '$0.50/item over 1,000', '$0.25/item over 500', 'None', '$0.00/item over 10,000'] },
+            { feature: 'Free Cash Processing', values: ['Up to $10,000/month', 'Up to $20,000/month', 'Up to $50,000/month', 'Up to $25,000/month', 'Unlimited', 'Up to $0/month'] },
+            { feature: 'Cash Processing Fee', values: ['$0.15 per $100 over limit', '$0.15 per $100 over limit', '$0.15 per $100 over limit', '$0.15 per $100 over limit', 'None', '$0.00 per $100 over limit'] },
+            { feature: 'Wire Transfers', values: ['Standard fees apply', 'First five incoming/outgoing domestic wires free', 'Standard fees apply', 'Unlimited free incoming/outgoing domestic wires', 'Standard fees apply', 'Standard fees apply'] },
+            { feature: 'Minimum to Open', values: ['$100', '$100', '$100', '$100', '$50', '$0'] },
+            { feature: 'Target Customer', values: ['Small Businesses', 'Small-Mid Sized Businesses', 'Mid-Large Businesses', 'Female Business Owners', 'Non-Profit Organizations', 'Businesses with Payroll Needs'] },
+        ];
+        let accountNamesForComparison = ['Small Business Checking', 'Business Banking Checking', 'Business Checking Plus', 'Women in Business Checking', 'Non-Profit Checking', 'Valley Direct Deposit Payroll'];
+
+        let questionnaireSteps = [
+            { id: 'businessType', title: 'Business Type', icon: 'briefcase', questionText: 'What type of business do you operate?', questionSubtext: 'Select the category that best describes your business. We\'ll use this to find accounts tailored to your specific business type and needs.', options: [
+                { id: 'small_business', icon: 'briefcase', title: 'Small Business', description: 'Sole proprietors, small LLCs, or startups with limited transaction needs' },
+                { id: 'medium_business', icon: 'building', title: 'Medium-sized Business', description: 'Established businesses with moderate volume & multiple employees' },
+                { id: 'large_business', icon: 'trending-up', title: 'Large Business', description: 'Larger enterprises with significant transaction volume and complex needs' },
+                { id: 'female_owned', icon: 'user-check', title: 'Female-owned Business', description: 'Any business where a woman is a primary owner or decision-maker' },
+                { id: 'non_profit', icon: 'gift', title: 'Non-Profit Organization', description: 'Charity, foundation, association, or other non-profit entity' },
+                { id: 'hoa', icon: 'home-alt', title: "Homeowner's Association", description: 'Property or condominium owners association' },
+                { id: 'other', icon: 'help-circle', title: 'Other Business Type', description: 'Other specialized business types (estates, government, etc.)' },
+            ], isMultiSelect: false, required: true, nextButtonText: 'Next: Business Size', skipButtonText: null, prevButtonText: null, finalButtonText: null },
+            { id: 'businessSize', title: 'Business Size', icon: 'building', questionText: 'What\'s your business size?', questionSubtext: 'What is the size of your business? This helps us determine which account types are most suitable for your operations.', options: [
+                { id: 'small', icon: 'briefcase', title: 'Small Business', description: 'Annual revenue under $1M, fewer than 10 employees' },
+                { id: 'medium', icon: 'building', title: 'Medium Business', description: 'Annual revenue $1M-$10M, 10-50 employees' },
+                { id: 'large', icon: 'trending-up', title: 'Large Business', description: 'Annual revenue over $10M, more than 50 employees' },
+            ], isMultiSelect: false, required: true, nextButtonText: 'Next: Transaction Volume', skipButtonText: null, prevButtonText: 'Back to Business Type', finalButtonText: null },
+            { id: 'transactionVolume', title: 'Transaction Volume', icon: 'trending-up', questionText: 'Monthly transaction activity', questionSubtext: 'How many transactions do you process monthly? Includes checks, deposits, ACH transfers, and other banking transactions.', options: [
+                { id: 'low', title: '< 300', description: 'transactions/month' },
+                { id: 'medium', title: '300-500', description: 'transactions/month' },
+                { id: 'high', title: '500+', description: 'transactions/month' },
+            ], isMultiSelect: false, required: false, nextButtonText: 'Next: Cash Handling', skipButtonText: 'Skip This Question', prevButtonText: 'Back to Business Size', finalButtonText: null },
+            { id: 'cashHandling', title: 'Cash Handling', icon: 'dollar-sign', questionText: 'Cash Handling Needs', questionSubtext: 'How much cash does your business typically handle?', options: [
+                {id: 'low_cash', title: 'Low Cash', description: 'Minimal cash deposits/withdrawals'},
+                {id: 'med_cash', title: 'Medium Cash', description: 'Regular cash deposits/withdrawals'},
+                {id: 'high_cash', title: 'High Cash', description: 'Significant cash deposits/withdrawals'}
+            ], isMultiSelect: false, required: false, nextButtonText: 'Next: Balance Capacity', skipButtonText: 'No Cash Needs', prevButtonText: 'Back to Transaction Volume', finalButtonText: null },
+            { id: 'balanceCapacity', title: 'Balance Capacity', icon: 'credit-card', questionText: 'Typical Account Balance', questionSubtext: 'What is the typical range of balances you maintain in your business accounts?', options: [
+                {id: 'low_bal', title: 'Low Balance', description: 'Typically keep lower balances'},
+                {id: 'med_bal', title: 'Medium Balance', description: 'Maintain moderate balances'},
+                {id: 'high_bal', title: 'High Balance', description: 'Maintain significant balances'}
+            ], isMultiSelect: false, required: false, nextButtonText: 'Next: Banking Services', skipButtonText: 'Skip Balance Info', prevButtonText: 'Back to Cash Handling', finalButtonText: null },
+            { id: 'bankingServices', title: 'Banking Services', icon: 'settings', questionText: 'Required Banking Services', questionSubtext: 'Which additional banking services are important for your business?', options: [
+                {id: 'wires', title: 'Wire Transfers'},
+                {id: 'ach', title: 'ACH Payments'},
+                {id: 'payroll', title: 'Payroll Services'},
+                {id: 'merchant', title: 'Merchant Services'},
+                {id: 'loans', title: 'Business Loans/Credit'}
+            ], isMultiSelect: true, required: false, nextButtonText: 'Next: Special Requirements', skipButtonText: 'No Specific Services', prevButtonText: 'Back to Balance Capacity', finalButtonText: null },
+            { id: 'specialRequirements', title: 'Special Requirements', icon: 'gift', questionText: 'Special Requirements', questionSubtext: 'Are there any other special requirements or features you need?', options: [
+                {id: 'international', title: 'International Banking'},
+                {id: 'escrow', title: 'Escrow Accounts'},
+                {id: 'non_profit_specific', title: 'Non-Profit Specific Features'}
+            ], isMultiSelect: true, required: false, nextButtonText: null, skipButtonText: 'Skip Questions and View Recommendations', prevButtonText: 'Back to Banking Services', finalButtonText: 'View Recommendations' }
+        ];
+
+        const businessBundles = [
+            { name: 'Basic Business Bundle', price: '$15/month', description: 'For small businesses with limited needs', waivedWith: '$1,500 average daily balance', monthlyDetail: 'Automatically waived for the first 2 cycles. (new accounts only)', features: ['100 transactions/month', 'Up to $10,000 cash deposits/month', 'Incoming wires included', 'Basic online banking'], popular: false },
+            { name: 'Advantage Business Bundle', price: '$45/month', description: 'For growing businesses with moderate needs', waivedWith: '$5,000 average daily balance', monthlyDetail: '($20 Monthly Maintenance Fee/ $25 TreasuryServices Fee)', features: ['300 transactions/month', 'Up to $15,000 cash deposits/month', 'First 5 incoming/outgoing domestic wires free', 'Enhanced mobile banking'], popular: true },
+            { name: 'Premier Business Bundle', price: '$55/month', description: 'For established businesses with high volume', waivedWith: '$10,000 average daily balance', monthlyDetail: '($25 Monthly Maintenance Fee/$30 Treasury Services Fee)', features: ['600 transactions/month', 'Up to $30,000 cash deposits/month', 'Unlimited incoming/outgoing domestic wires', 'Fraud protection with Positive Pay'], popular: false },
+        ];
+
+        // SVG Icons
+        const icons = {
+            'file-text': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-600"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+            'calculator': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-600"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="10" y2="14"></line><line x1="14" y1="14" x2="16" y2="14"></line><line x1="8" y1="18" x2="10" y2="18"></line><line x1="14" y1="18" x2="16" y2="18"></line></svg>`,
+            'scale': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-600"><path d="M16 16.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"></path><path d="M8.5 16.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"></path><path d="M12 3v13.5"></path><path d="M6 7l-3.15 3.15a.5.5 0 0 0 0 .7L6 14"></path><path d="M18 7l3.15 3.15a.5.5 0 0 1 0 .7L18 14"></path></svg>`,
+            'briefcase': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2 text-blue-600"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
+            'users': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2 text-blue-600"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+            'trending-up': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2 text-blue-600"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`,
+            'dollar-sign': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2 text-gray-600"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
+            'credit-card': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2 text-gray-600"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>`,
+            'settings': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2 text-gray-600"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 .54 1.73L2.78 14a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-.54-1.73l.03-1.73a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+            'gift': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2 text-gray-600"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>`,
+            'check-circle': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-green-500 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+            'building': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-3 text-blue-600"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>`,
+            'user-check': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-3 text-blue-600"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>`,
+            'home-alt': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
+            'help-circle': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-3 text-blue-600"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+            'chevron-left': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline w-5 h-5"><polyline points="15 18 9 12 15 6"></polyline></svg>`,
+            'chevron-right': `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline w-4 h-4"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
+            'search': `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
+            'menu': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`,
+            'x': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`,
+            'settings-alt': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 .54 1.73L2.78 14a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-.54-1.73l.03-1.73a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+            'list': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`,
+        };
+
+        // --- State Management ---
+        let currentPage = 'landing';
+        let currentStepIndex = 0;
+        let answers = {};
+        let activeTab = 'business';
+        let searchTerm = '';
+        let cart = [];
+        let selectedBundle = null;
+        let topRecommendedAccount = null;
+        let isDrawerOpen = false;
+        let isRailExpanded = true; // Default to expanded on larger screens
+
+        // --- Utility Functions ---
+        function debounce(func, wait) {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // --- CSV Parsing Logic ---
+        function parseCsv(csvText) {
+            console.log("Attempting to parse CSV...");
+            const lines = csvText.split('\n').filter(line => line.trim());
+            if (lines.length < 2) {
+                console.warn('CSV is empty or lacks data rows. Cannot parse.');
+                throw new Error('CSV is empty or lacks data rows.');
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            if (!headers.includes('datatype')) {
+                console.error('CSV missing "dataType" header. Cannot parse.');
+                throw new Error('CSV missing "dataType" header.');
+            }
+            console.log("CSV Headers:", headers);
+
+            const parsedProducts = { business: [], personal: [] };
+            const parsedQuestions = [];
+            const parsedComparison = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = [];
+                let inQuote = false;
+                let currentVal = '';
+                for (let j = 0; j < lines[i].length; j++) {
+                    const char = lines[i][j];
+                    if (char === '"' && (lines[i][j+1] !== '"' && lines[i][j-1] !== '"')) { // Handle "" as literal quote
+                        inQuote = !inQuote;
+                    } else if (char === ',' && !inQuote) {
+                        values.push(currentVal.replace(/^"|"$/g, '').replace(/""/g, '"'));
+                        currentVal = '';
+                    } else {
+                        currentVal += char;
+                    }
+                }
+                values.push(currentVal.replace(/^"|"$/g, '').replace(/""/g, '"'));
+
+                const trimmedValues = values.map(v => v.trim());
+
+                if (trimmedValues.length !== headers.length) {
+                    console.warn(`Skipping malformed row ${i + 1}: Expected ${headers.length} columns, got ${trimmedValues.length}. Row: "${lines[i]}".`);
+                    continue;
+                }
+
+                const item = {};
+                headers.forEach((h, idx) => {
+                    item[h] = trimmedValues[idx];
+                });
+
+                if (item.datatype.toLowerCase() === 'product') {
+                    const product = {
+                        name: item.name || '',
+                        targetCustomer: item.targetcustomer || '',
+                        features: item.features || '',
+                        serviceCharge: item.servicecharge || '',
+                        details: item.details || '',
+                        productCategory: item.productcategory || 'business'
+                    };
+                    if (product.productCategory.toLowerCase() === 'business') {
+                        parsedProducts.business.push(product);
+                    } else if (product.productCategory.toLowerCase() === 'personal') {
+                        parsedProducts.personal.push(product);
+                    }
+                } else if (item.datatype.toLowerCase() === 'question') {
+                    try {
+                        const optionsString = item.options || '[]';
+                        const options = JSON.parse(optionsString);
+                        parsedQuestions.push({
+                            id: item.questionid,
+                            title: item.questionid ? item.questionid.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Untitled Question',
+                            icon: item.icon || 'help-circle',
+                            questionText: item.questiontext || 'No question text provided.',
+                            questionSubtext: item.questionsubtext || '',
+                            options,
+                            isMultiSelect: item.ismultiselect?.toLowerCase() === 'true',
+                            required: item.required?.toLowerCase() === 'true',
+                            nextButtonText: item.nextbuttontext || null,
+                            skipButtonText: item.skipbuttontext || null,
+                            prevButtonText: item.prevbuttontext || null,
+                            finalButtonText: item.finalbuttontext || null
+                        });
+                    } catch (e) {
+                        console.warn(`Invalid options JSON in question row ${i+1}: "${item.options}". Error:`, e);
+                    }
+                } else if (item.datatype.toLowerCase() === 'comparisonfeature') {
+                    const comparisonValues = accountNamesForComparison.map(name => {
+                        const csvHeaderExact = name;
+                        const csvHeaderLower = name.toLowerCase();
+                        const csvHeaderLowerNoSpace = name.toLowerCase().replace(/\s+/g, '');
+                        return item[csvHeaderExact] || item[csvHeaderLower] || item[csvHeaderLowerNoSpace] || '';
+                    });
+                    parsedComparison.push({ feature: item.feature || item.name, values: comparisonValues });
+                }
+            }
+            console.log("Parsed Products:", parsedProducts);
+            console.log("Parsed Questions:", parsedQuestions);
+            console.log("Parsed Comparison:", parsedComparison);
+            return { products: parsedProducts, questions: parsedQuestions, comparison: parsedComparison };
+        }
+
+
+        function parseFee(feeString) {
+            if (!feeString || typeof feeString !== 'string') {
+                return { amount: 0, frequency: 'onetime', original: feeString };
+            }
+            const lower = feeString.toLowerCase();
+            if (lower.includes('included') || lower.includes('none') || lower.includes('$0')) {
+                return { amount: 0, frequency: 'included', original: feeString };
+            }
+            const amountMatch = feeString.match(/\$([\d,]+(\.\d{1,2})?)/);
+            const amount = amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : 0;
+            const frequency = lower.includes('/month') ? 'monthly' : lower.includes('/year') ? 'yearly' : 'onetime';
+            return { amount, frequency, original: feeString };
+        }
+
+        // --- Recommendation Logic ---
+        function calculateRecommendationScore(product, answers) {
+            let score = 0;
+            const featuresLower = (typeof product.features === 'string' ? product.features.toLowerCase() : '');
+            const targetCustomerLower = (typeof product.targetCustomer === 'string' ? product.targetCustomer.toLowerCase() : '');
+            const productNameLower = (typeof product.name === 'string' ? product.name.toLowerCase() : '');
+
+            if (answers.businessType) {
+                const typeAnswer = answers.businessType.replace(/_/g, ' ');
+                if (targetCustomerLower.includes(typeAnswer)) score += 30;
+                if (answers.businessType === 'female_owned' && (targetCustomerLower.includes('female business owners') || productNameLower.includes('women in business'))) score += 25;
+                if (answers.businessType === 'non_profit' && (targetCustomerLower.includes('non-profit') || productNameLower.includes('non-profit'))) score += 25;
+                if (answers.businessType === 'hoa' && targetCustomerLower.includes("homeowner's association")) score += 20;
+            }
+            if (answers.businessSize) {
+                if (answers.businessSize === 'small' && (targetCustomerLower.includes('small business') || productNameLower.includes('small business'))) score += 20;
+                if (answers.businessSize === 'medium' && (targetCustomerLower.includes('medium business') || targetCustomerLower.includes('small-mid sized') || productNameLower.includes('business banking checking'))) score += 20;
+                if (answers.businessSize === 'large' && (targetCustomerLower.includes('large business') || targetCustomerLower.includes('mid-large') || productNameLower.includes('business checking plus'))) score += 20;
+            }
+            if (answers.transactionVolume) {
+                if (answers.transactionVolume === 'low') {
+                    if (featuresLower.includes('100 transactions') || featuresLower.includes('200 transactions') || featuresLower.includes('300 transactions')) score += 20;
+                } else if (answers.transactionVolume === 'medium') {
+                    if (featuresLower.includes('300 transactions') || featuresLower.includes('400 transactions') || featuresLower.includes('500 transactions')) score += 20;
+                } else if (answers.transactionVolume === 'high') {
+                    if (featuresLower.includes('500+ transactions') || featuresLower.includes('1000 transactions') || featuresLower.includes('1,000 transactions') || featuresLower.includes('unlimited transactions')) score += 25;
+                }
+            }
+            if (answers.cashHandling) {
+                if (answers.cashHandling === 'high_cash' && (featuresLower.includes('high cash') || featuresLower.includes('$20,000 cash') || featuresLower.includes('$30,000 cash') || featuresLower.includes('$50,000 cash'))) score += 20;
+                else if (answers.cashHandling === 'med_cash' && (featuresLower.includes('medium cash') || featuresLower.includes('$10,000 cash') || featuresLower.includes('$15,000 cash'))) score += 15;
+                else if (answers.cashHandling === 'low_cash' && (featuresLower.includes('low cash') || featuresLower.includes('minimal cash') || featuresLower.includes('$5,000 cash'))) score += 10;
+            }
+            if (answers.balanceCapacity) {
+                const feeWaivedWith = (typeof product.waivedWith === 'string' ? product.waivedWith.toLowerCase() : '');
+                const serviceChargeAmount = parseFee(product.serviceCharge || product.price).amount;
+                if (answers.balanceCapacity === 'high_bal') {
+                    if (feeWaivedWith.includes('10,000') || feeWaivedWith.includes('none') || serviceChargeAmount === 0) score += 20;
+                    else if (feeWaivedWith.includes('5,000')) score += 10;
+                } else if (answers.balanceCapacity === 'med_bal') {
+                    if (feeWaivedWith.includes('5,000') || feeWaivedWith.includes('2,500') || serviceChargeAmount <= 25) score += 15;
+                } else if (answers.balanceCapacity === 'low_bal') {
+                    if (feeWaivedWith.includes('1,500') || feeWaivedWith.includes('1,000') || feeWaivedWith.includes('500') || serviceChargeAmount <= 15) score += 10;
+                }
+            }
+            if (answers.bankingServices && Array.isArray(answers.bankingServices)) {
+                answers.bankingServices.forEach(service => {
+                    const serviceClean = service.replace(/_/g, ' ').toLowerCase();
+                    if (featuresLower.includes(serviceClean)) score += 10;
+                    if (service === 'wires' && (featuresLower.includes('wires free') || featuresLower.includes('unlimited wires'))) score += 5;
+                    if (service === 'payroll' && (featuresLower.includes('payroll') || productNameLower.includes('payroll'))) score += 15;
+                    if (service === 'merchant' && featuresLower.includes('merchant services')) score += 15;
+                    if (service === 'loans' && (featuresLower.includes('loan') || featuresLower.includes('credit'))) score += 5;
+                });
+            }
+            if (answers.specialRequirements && Array.isArray(answers.specialRequirements)) {
+                answers.specialRequirements.forEach(req => {
+                    if (req === 'non_profit_specific' && (targetCustomerLower.includes('non-profit') || productNameLower.includes('non-profit'))) score += 25;
+                    if (req === 'international' && featuresLower.includes('international banking')) score += 15;
+                    if (req === 'escrow' && featuresLower.includes('escrow accounts')) score += 15;
+                });
+            }
+            if (product.price && answers.bankingServices) {
+                if (answers.bankingServices.includes('wires') && featuresLower.includes('wires')) score += 5;
+                if (answers.bankingServices.includes('ach') && featuresLower.includes('ach')) score += 5;
+            }
+            return score;
+        }
+
+        function getRecommendations() {
+            try {
+                console.log("Calculating recommendations based on answers:", answers);
+                const allItems = [
+                    ...productsData.filter(p => p.productCategory === 'business'),
+                    ...businessBundles
+                ].map(item => ({
+                    ...item,
+                    score: calculateRecommendationScore(item, answers)
+                }));
+
+                allItems.sort((a, b) => b.score - a.score);
+                console.log("Scored Items:", allItems.map(i => ({name: i.name, score: i.score, target: i.targetCustomer, features: i.features })));
+
+                if (!answers || Object.keys(answers).length === 0) {
+                    showSnackbar("No answers available to generate recommendations. Please complete the questionnaire.");
+                    return { top: null, others: [] };
+                }
+                const topPick = allItems.length > 0 && allItems[0].score > 0 ? allItems[0] : null;
+                const otherPicks = allItems.slice(1, 4).filter(item => item.score > 0 && item.name !== topPick?.name);
+                return { top: topPick, others: otherPicks };
+            } catch (error) {
+                console.error("Error in getRecommendations:", error);
+                showSnackbar("Error generating recommendations. Please try again or contact support.");
+                return { top: null, others: [] };
+            }
+        }
+
+        // --- Navigation Functions ---
+        function navigateTo(page) {
+            console.log(`Navigating to: ${page}`);
+            currentPage = page;
+            if (page === 'questionnaire') {
+                currentStepIndex = 0;
+                answers = {};
+                topRecommendedAccount = null;
+                selectedBundle = null;
+                cart = [];
+            }
+            render();
+            updateNavActiveStates();
+            updateAppContainerMargin(); // Ensure margin is correct after navigation
+        }
+
+        function toggleNavDrawer() {
+            isDrawerOpen = !isDrawerOpen;
+            const drawer = document.getElementById('nav-drawer');
+            const overlay = document.getElementById('nav-drawer-overlay');
+            if (drawer && overlay) {
+                drawer.classList.toggle('open', isDrawerOpen);
+                overlay.classList.toggle('open', isDrawerOpen);
+            }
+        }
+
+        function toggleNavRail() {
+            isRailExpanded = !isRailExpanded;
+            const rail = document.getElementById('nav-rail');
+            const railToggleButton = document.getElementById('nav-rail-toggle');
+            if (rail && railToggleButton) {
+                rail.classList.toggle('expanded', isRailExpanded);
+                railToggleButton.innerHTML = isRailExpanded ? (icons['chevron-left'] || '&lt;') : (icons['menu'] || '☰');
+                railToggleButton.setAttribute('aria-label', isRailExpanded ? 'Collapse navigation rail' : 'Expand navigation rail');
+            }
+            updateAppContainerMargin();
+        }
+
+        function updateAppContainerMargin() {
+            const appContainer = document.getElementById('app-container');
+            if (!appContainer) return;
+
+            // Check if we are on a medium or larger screen (where rail is visible)
+            // This check can be refined, e.g., by checking if #nav-rail is display:flex
+            const isLargeScreen = window.innerWidth >= 768; // Matches md breakpoint
+
+            if (isLargeScreen) {
+                appContainer.classList.toggle('rail-expanded', isRailExpanded);
+                appContainer.classList.toggle('rail-collapsed', !isRailExpanded);
+            } else {
+                // On small screens, rail is hidden, so no margin needed from it.
+                appContainer.classList.remove('rail-expanded', 'rail-collapsed');
+                appContainer.style.marginLeft = '0px'; // Explicitly set to 0
+            }
+        }
+
+
+        function updateNavActiveStates() {
+            // Update Drawer
+            const drawerItems = document.querySelectorAll('.nav-drawer-item');
+            drawerItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.action === `navigate-to-drawer-${currentPage}`) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Update Rail
+            const railItems = document.querySelectorAll('.nav-rail-item');
+            railItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.action === `navigate-to-rail-${currentPage}`) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+
+        function setStepIndex(index) {
+            console.log(`Attempting to set step index to: ${index}. Current step: ${currentStepIndex}`);
+            if (!questionnaireSteps || questionnaireSteps.length === 0) {
+                showSnackbar("No questionnaire questions available.");
+                return;
+            }
+            if (index > currentStepIndex) {
+                const currentStep = questionnaireSteps[currentStepIndex];
+                if (currentStep && currentStep.required) {
+                    const currentAnswer = answers[currentStep.id];
+                    const isAnswered = currentStep.isMultiSelect ? (currentAnswer && currentAnswer.length > 0) : (currentAnswer !== null && currentAnswer !== undefined && currentAnswer !== '');
+                    if (!isAnswered) {
+                        showSnackbar(`Please answer "${currentStep.questionText}" to continue.`);
+                        return;
+                    }
+                }
+            }
+            let nextIndex = index;
+            if (nextIndex >= questionnaireSteps.length) {
+                navigateTo('recommendations');
+            } else if (nextIndex < 0) {
+                currentStepIndex = 0;
+                render();
+            } else {
+                currentStepIndex = nextIndex;
+                render();
+            }
+        }
+
+        // --- Event Handlers (Called by Event Delegation) ---
+        function handleOptionClick(stepId, optionId, isMultiSelect) {
+            console.log(`Option clicked: StepId=${stepId}, OptionId=${optionId}, MultiSelect=${isMultiSelect}`);
+            if (isMultiSelect) {
+                answers[stepId] = answers[stepId] || [];
+                if (answers[stepId].includes(optionId)) {
+                    answers[stepId] = answers[stepId].filter(id => id !== optionId);
+                } else {
+                    answers[stepId].push(optionId);
+                }
+            } else {
+                answers[stepId] = optionId;
+            }
+            console.log("Current Answers:", answers);
+            render();
+        }
+
+        function setActiveTab(tab) {
+            activeTab = tab;
+            searchTerm = '';
+            render();
+        }
+
+        function toggleCartItem(itemName, itemType = 'product') {
+            const isInCart = cart.some(item => item.name === itemName && item.type === itemType);
+            if (isInCart) {
+                cart = cart.filter(item => !(item.name === itemName && item.type === itemType));
+                showSnackbar(`${itemName} removed from cart.`);
+            } else {
+                let itemToAdd = null;
+                if (itemType === 'product') {
+                    itemToAdd = productsData.find(p => p.name === itemName);
+                } else if (itemType === 'bundle') {
+                    itemToAdd = businessBundles.find(b => b.name === itemName);
+                }
+                if (!itemToAdd && topRecommendedAccount && topRecommendedAccount.name === itemName) {
+                    itemToAdd = { ...topRecommendedAccount, type: 'product' };
+                }
+                if (itemToAdd) {
+                    cart.push({ ...itemToAdd, type: itemType });
+                    showSnackbar(`${itemName} added to cart.`);
+                } else {
+                    showSnackbar(`Could not find ${itemName} to add to cart.`);
+                    console.warn("Could not find item to add to cart:", itemName, itemType);
+                }
+            }
+            render();
+        }
+
+        function selectBundle(bundleName) {
+            if (selectedBundle && selectedBundle.name === bundleName) {
+                selectedBundle = null;
+                showSnackbar(`${bundleName} deselected.`);
+            } else {
+                selectedBundle = businessBundles.find(b => b.name === bundleName);
+                if (selectedBundle) {
+                    showSnackbar(`${selectedBundle.name} selected!`);
+                }
+            }
+            render();
+        }
+
+        function showSnackbar(message) {
+            const snackbarContainer = document.getElementById('snackbar-container');
+            if (!snackbarContainer) return;
+            Array.from(snackbarContainer.children).forEach(child => child.remove());
+            const snackbar = document.createElement('div');
+            snackbar.className = 'snackbar';
+            snackbar.textContent = message;
+            snackbarContainer.appendChild(snackbar);
+            requestAnimationFrame(() => {
+                snackbar.classList.add('show');
+            });
+            setTimeout(() => {
+                snackbar.classList.remove('show');
+                snackbar.addEventListener('transitionend', () => snackbar.remove(), { once: true });
+            }, 3000);
+        }
+
+        function getProductDetailsFromComparison(productName) {
+            const details = { monthlyFee: 'N/A', minBalanceToWaive: 'N/A', freeTransactions: 'N/A' };
+            if (!productName || !accountNamesForComparison || !accountComparisonData) return details;
+            const productIndex = accountNamesForComparison.findIndex(name => name.toLowerCase() === productName.toLowerCase());
+            if (productIndex === -1) {
+                const productData = [...productsData, ...businessBundles].find(p => p.name.toLowerCase() === productName.toLowerCase());
+                if (productData) {
+                    details.monthlyFee = productData.serviceCharge || productData.price || 'N/A';
+                    const featuresLower = (typeof productData.features === 'string' ? productData.features.toLowerCase() : (Array.isArray(productData.features) ? productData.features.join(' ').toLowerCase() : ''));
+                    const transactionMatch = featuresLower.match(/(\d+|unlimited)\s*transactions/);
+                    if (transactionMatch) details.freeTransactions = transactionMatch[0];
+                    if (productData.waivedWith) details.minBalanceToWaive = productData.waivedWith;
+                }
+                return details;
+            }
+            accountComparisonData.forEach(featureRow => {
+                const featureKey = featureRow.feature?.toLowerCase();
+                const value = featureRow.values[productIndex] || 'N/A';
+                if (featureKey === 'monthly fee') details.monthlyFee = value;
+                else if (featureKey === 'required balance to waive fee') details.minBalanceToWaive = value;
+                else if (featureKey === 'free transactions') details.freeTransactions = value;
+            });
+            return details;
+        }
+
+        function renderAccountComparisonTable(recommendedAccountName) {
+            if (!accountComparisonData || accountComparisonData.length === 0) {
+                return '<p class="text-gray-600">Account comparison data is not available.</p>';
+            }
+            let html = `<div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-blue-600">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider sticky-left bg-blue-600 z-20">Feature</th>`;
+            accountNamesForComparison.forEach(accountName => {
+                const isRecommended = recommendedAccountName && accountName.toLowerCase() === recommendedAccountName.toLowerCase();
+                html += `<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider ${isRecommended ? 'bg-blue-700' : ''}">${accountName}</th>`;
+            });
+            html += `</tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
+            accountComparisonData.forEach(row => {
+                html += `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky-left bg-white z-10">${row.feature}</td>`;
+                row.values.forEach((value, index) => {
+                    const currentColumnAccountName = accountNamesForComparison[index];
+                    const isRecommendedColumnCell = recommendedAccountName && currentColumnAccountName.toLowerCase() === recommendedAccountName.toLowerCase();
+                    html += `<td class="px-6 py-4 whitespace-normal text-sm ${isRecommendedColumnCell ? 'bg-blue-50 font-semibold text-blue-700' : 'text-gray-500'}">${value}</td>`;
+                });
+                html += `</tr>`;
+            });
+            html += `</tbody></table></div>`;
+            return html;
+        }
+
+        // --- Render Page Contents ---
+        function renderLandingPage() {
+            const currentProducts = activeTab === 'business' ? productsData.filter(p => p.productCategory === 'business') : productsData.filter(p => p.productCategory === 'personal');
+            const filteredProducts = currentProducts.filter(product =>
+                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.targetCustomer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (typeof product.features === 'string' && product.features.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+
+            return `
+                <div class="bg-gray-50 min-h-screen">
+                    <header class="bg-white shadow-sm sticky top-0 z-30"> <!-- Lower z-index than rail/drawer -->
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                            <button data-action="toggle-nav-drawer" class="nav-drawer-toggle-header p-2 text-gray-600 hover:text-blue-600 md:hidden">
+                                ${icons['menu']}
+                            </button>
+                            <div class="text-xl sm:text-2xl font-bold text-blue-700 cursor-pointer flex-1 md:flex-none text-center md:text-left" data-action="navigate-to-landing">AccountFinder Pro</div>
+                            <div class="hidden md:flex items-center space-x-4">
+                                <!-- Desktop quick nav or actions can go here if needed -->
+                            </div>
+                             <div class="md:hidden"> <!-- Placeholder for right side on mobile if needed -->
+                                <button data-action="navigate-to-questionnaire" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-3 rounded-md text-sm">
+                                    Start
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <section class="py-12 md:py-20 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6">Find Your Perfect Business Account</h1>
+                            <p class="text-lg sm:text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+                                Navigate the complex world of business banking with our guided questionnaire. We'll match your specific business needs with the right accounts and services.
+                            </p>
+                            <button data-action="navigate-to-questionnaire" class="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-gray-100 transition duration-150 ease-in-out text-lg" aria-label="Get started with the questionnaire">
+                                Get Started Now
+                            </button>
+                            <div class="mt-8">
+                                <input type="file" id="csvFileInput" class="hidden" accept=".csv">
+                                <label for="csvFileInput" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg cursor-pointer inline-block shadow-md">Upload Data (CSV)</label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="py-16 bg-white">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">How Our Recommendation Tool Works</h2>
+                            <div class="grid md:grid-cols-3 gap-8 text-center">
+                                <div class="p-6 bg-gray-50 rounded-xl shadow-lg">
+                                    <div class="flex justify-center mb-4">${icons['file-text']}</div>
+                                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Answer Questions</h3>
+                                    <p class="text-gray-600">Provide information about your business size, transaction volume, cash handling, and special requirements.</p>
+                                </div>
+                                <div class="p-6 bg-gray-50 rounded-xl shadow-lg">
+                                    <div class="flex justify-center mb-4">${icons['calculator']}</div>
+                                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Get Recommendations</h3>
+                                    <p class="text-gray-600">Our algorithm analyzes your needs and matches them with the most suitable account options.</p>
+                                </div>
+                                <div class="p-6 bg-gray-50 rounded-xl shadow-lg">
+                                    <div class="flex justify-center mb-4">${icons['scale']}</div>
+                                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Compare Options</h3>
+                                    <p class="text-gray-600">Compare features, fees, and benefits to make an informed decision for your business banking needs.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="py-16 bg-gray-100">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                                <div class="md:w-1/2">
+                                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Find the Perfect Account for Your Business</h2>
+                                    <p class="text-gray-600 mb-6 text-lg">
+                                        Our recommendation tool helps business owners like you find the right banking solutions to manage finances effectively and support your growth goals.
+                                    </p>
+                                    <ul class="space-y-3 mb-8">
+                                        <li class="flex items-center text-gray-700">${icons['check-circle'] || ''} Save money by finding accounts with waivable fees</li>
+                                        <li class="flex items-center text-gray-700">${icons['check-circle'] || ''} Minimize transaction costs based on your volume</li>
+                                        <li class="flex items-center text-gray-700">${icons['check-circle'] || ''} Discover specialized accounts for your business type</li>
+                                    </ul>
+                                    <button data-action="navigate-to-questionnaire" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-150 ease-in-out text-lg" aria-label="Start the questionnaire now">
+                                        Start Now
+                                    </button>
+                                </div>
+                                <div class="md:w-1/2">
+                                    <img src="https://placehold.co/600x400/a3bffa/ffffff?text=Business+Banking" alt="Business person signing documents" class="rounded-lg shadow-xl w-full h-auto object-cover" onerror="this.src='https://placehold.co/600x400/e0e0e0/757575?text=Image+Not+Found';">
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="py-16 bg-blue-600 text-white">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                            <h2 class="text-3xl font-bold mb-4">Ready to Find Your Ideal Business Account?</h2>
+                            <p class="text-lg mb-8 max-w-2xl mx-auto">Answer a few simple questions about your business and discover banking options tailored specifically to your needs.</p>
+                            <button data-action="navigate-to-questionnaire" class="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-gray-100 transition duration-150 ease-in-out text-lg" aria-label="Get your personalized recommendations">
+                                Get Your Recommendations
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="py-16 bg-gray-50" id="products-services">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                            <h2 class="text-3xl font-bold text-gray-800 mb-3">Products & Services</h2>
+                            <p class="text-gray-600 mb-8">In addition to our checking accounts, we offer a range of products and services to help you manage your finances effectively:</p>
+                            <div class="mb-6 relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">${icons['search']}</div>
+                                <input type="text"
+                                    id="product-search"
+                                    placeholder="Search products by name, features, or customer type..."
+                                    class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                    value="${searchTerm}"
+                                    data-action="search-products"
+                                    aria-label="Search products">
+                            </div>
+                            <div class="mb-6 border-b border-gray-200">
+                                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                                    <button data-action="set-active-tab" data-tab-name="business" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'business' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}" aria-current="${activeTab === 'business' ? 'page' : 'false'}">Business Products</button>
+                                    <button data-action="set-active-tab" data-tab-name="personal" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'personal' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}" aria-current="${activeTab === 'personal' ? 'page' : 'false'}">Personal Products</button>
+                                </nav>
+                            </div>
+                            ${activeTab === 'business' || activeTab === 'personal' ? `
+                                <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-blue-600">
+                                            <tr>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Product/Service</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Target Customer</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Key Features</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Service Charge</th>
+                                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Details</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            ${filteredProducts.length === 0 ? `<tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No products available for this category or search.</td></tr>` :
+                                            filteredProducts.map(product => `
+                                                <tr>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${product.name}</td>
+                                                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-500">${product.targetCustomer}</td>
+                                                    <td class="px-6 py-4 text-sm text-gray-500">${product.features}</td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.serviceCharge}</td>
+                                                    <td class="px-6 py-4 text-sm text-gray-500">${product.details}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ` : `
+                                <p class="text-center text-gray-600 mt-8">Select a tab to view products.</p>
+                            `}
+                        </div>
+                    </section>
+
+                    <section class="py-16 bg-gray-100" id="comparison-chart">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">Account Comparison Chart</h2>
+                            ${renderAccountComparisonTable(null)}
+                        </div>
+                    </section>
+
+                    <footer class="bg-gray-800 text-white py-8">
+                        <div class="container mx-auto px-4 text-center">
+                            <p>&copy; ${new Date().getFullYear()} AccountFinder Pro. All rights reserved.</p>
+                        </div>
+                    </footer>
+                </div>
+            `;
+        }
+
+        function renderQuestionnaire() {
+            const step = questionnaireSteps[currentStepIndex];
+
+            if (!questionnaireSteps || questionnaireSteps.length === 0) {
+                 return `<div class="container mx-auto p-6 text-center bg-white shadow rounded-lg mt-8"><h2 class="text-2xl font-bold text-gray-800">No questionnaire steps are loaded.</h2><p class="mt-4 text-gray-600">Please load a CSV with questions.</p><button data-action="navigate-to-landing" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md">Back to Home</button></div>`;
+            }
+            if (!step || !step.options) {
+                console.error("Error: Invalid question step or missing options at index", currentStepIndex, step);
+                return `<div class="container mx-auto p-6 text-center bg-white shadow rounded-lg mt-8"><h2 class="text-2xl font-bold text-gray-800">Error: Invalid question data.</h2><p class="mt-4 text-gray-600">Step ${currentStepIndex + 1} is missing or has no options.</p><button data-action="navigate-to-landing" class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md">Back to Home</button></div>`;
+            }
+
+            answers[step.id] = answers[step.id] === undefined ? (step.isMultiSelect ? [] : null) : answers[step.id];
+            let progress = questionnaireSteps.length > 0 ? ((currentStepIndex + 1) / questionnaireSteps.length) * 100 : 0;
+            const isContinueDisabled = step.required && (!answers[step.id] || (step.isMultiSelect && answers[step.id].length === 0));
+
+            return `
+                <header class="bg-white shadow-sm sticky top-0 z-30">
+                    <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                        <button data-action="toggle-nav-drawer" class="nav-drawer-toggle-header p-2 text-gray-600 hover:text-blue-600 md:hidden">
+                            ${icons['menu']}
+                        </button>
+                        <div class="text-xl sm:text-2xl font-bold text-blue-700 cursor-pointer flex-1 md:flex-none text-center md:text-left" data-action="navigate-to-landing">AccountFinder Pro</div>
+                        <div class="md:hidden w-10"></div> <!-- Spacer for mobile to balance title -->
+                    </div>
+                </header>
+                <div class="flex flex-col md:flex-row min-h-[calc(100vh-4rem)] bg-gray-50 p-4"> {/* Adjust min-h for header */}
+                    <div class="w-full md:w-1/4 bg-white rounded-lg shadow-md p-6 md:mr-4 md:sticky md:top-[calc(4rem+1rem)] self-start max-h-[calc(100vh-6rem)] overflow-y-auto"> {/* Sticky sidebar */}
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Account Navigator</h2>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${progress}%"></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-6">${Math.round(progress)}% Complete</p>
+                        <nav>
+                            ${questionnaireSteps.map((s, i) => {
+                                const isPrevStepAnswered = i === 0 || (answers[questionnaireSteps[i-1]?.id] && (questionnaireSteps[i-1]?.isMultiSelect ? answers[questionnaireSteps[i-1]?.id].length > 0 : true));
+                                const isDisabled = i > currentStepIndex && !isPrevStepAnswered && questionnaireSteps[i-1]?.required;
+                                return `
+                                <button type="button" class="w-full text-left sidebar-item ${i === currentStepIndex ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
+                                    data-action="set-step-index" data-step-index-val="${i}" ${isDisabled ? 'tabindex="-1"' : ''}>
+                                    <div class="flex items-center">
+                                        ${icons[s.icon] || ''} <span class="ml-2">${s.title}</span>
+                                    </div>
+                                </button>`;
+                            }).join('')}
+                        </nav>
+                        <button data-action="navigate-to-landing" class="mt-6 w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg shadow-md">
+                            Exit Questionnaire
+                        </button>
+                    </div>
+
+                    <div class="flex-1 bg-white rounded-lg shadow-md p-6 mt-4 md:mt-0">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">${step.questionText}</h2>
+                        <p class="text-gray-600 mb-6">${step.questionSubtext}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                            ${step.options.map(option => `
+                                <div class="option-card p-6 border-2 border-gray-200 rounded-lg text-center cursor-pointer
+                                    ${(step.isMultiSelect && answers[step.id]?.includes(option.id)) || (!step.isMultiSelect && answers[step.id] === option.id) ? 'selected' : ''}"
+                                    data-action="handle-option-click" data-step-id="${step.id}" data-option-id="${option.id}" data-is-multi-select="${step.isMultiSelect}">
+                                    ${option.icon ? (icons[option.icon] || `<span class="text-2xl">${option.icon}</span>`) : ''}
+                                    <h3 class="text-lg font-semibold text-gray-700 mb-1">${option.title}</h3>
+                                    <p class="text-sm text-gray-500">${option.description || ''}</p>
+                                </div>`).join('')}
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <button data-action="set-step-change" data-change="-1" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg shadow-md mr-2 ${currentStepIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''}" ${currentStepIndex === 0 ? 'disabled' : ''}>
+                                    ${step.prevButtonText || `${icons['chevron-left'] || ''} Previous`}
+                                </button>
+                                ${step.options.length > 0 ? `<button data-action="reset-current-step" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg shadow-md">Reset Selection</button>` : ''}
+                            </div>
+                            <div class="flex items-center">
+                                ${(() => {
+                                    let buttonsHTML = '';
+                                    if (step.skipButtonText) {
+                                        let skipAction = `data-action="set-step-change" data-change="1"`;
+                                        let skipClass = "bg-yellow-400 hover:bg-yellow-500 text-gray-800";
+                                        if (step.skipButtonText.toLowerCase().includes("view recommendations")) {
+                                            skipAction = `data-action="navigate-to-recommendations"`;
+                                            skipClass = "bg-yellow-500 hover:bg-yellow-600 text-white";
+                                        }
+                                        buttonsHTML += `<button ${skipAction} class="${skipClass} font-semibold py-2 px-4 rounded-lg shadow-md mr-3">${step.skipButtonText}</button>`;
+                                    }
+                                    if (step.finalButtonText) {
+                                        buttonsHTML += `<button data-action="navigate-to-recommendations" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md ${isContinueDisabled ? 'opacity-50 cursor-not-allowed' : ''}" ${isContinueDisabled ? 'disabled' : ''}>${step.finalButtonText} ${icons['chevron-right'] || ''}</button>`;
+                                    } else if (step.nextButtonText) {
+                                        buttonsHTML += `<button data-action="set-step-change" data-change="1" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md ${isContinueDisabled ? 'opacity-50 cursor-not-allowed' : ''}" ${isContinueDisabled ? 'disabled' : ''}>${step.nextButtonText} ${icons['chevron-right'] || ''}</button>`;
+                                    }
+                                    return buttonsHTML;
+                                })()}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderRecommendationsPage() {
+            let recs;
+            try {
+                recs = getRecommendations();
+            } catch (error) {
+                console.error("Error generating recommendations:", error);
+                showSnackbar("Error generating recommendations. Please check answers or data.");
+                recs = { top: null, others: [] };
+            }
+            topRecommendedAccount = recs.top;
+            const allRecommendedItems = recs.others.filter(item => item.name !== recs.top?.name);
+            const topRecDetails = recs.top ? getProductDetailsFromComparison(recs.top.name) : {};
+
+            return `
+                <div class="bg-gray-100 min-h-screen">
+                    <header class="bg-white shadow-sm sticky top-0 z-30">
+                        <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                            <button data-action="toggle-nav-drawer" class="nav-drawer-toggle-header p-2 text-gray-600 hover:text-blue-600 md:hidden">
+                                ${icons['menu']}
+                            </button>
+                            <div class="text-xl sm:text-2xl font-bold text-blue-700 cursor-pointer flex-1 md:flex-none text-center md:text-left" data-action="navigate-to-landing">AccountFinder Pro</div>
+                            <button data-action="navigate-to-questionnaire" class="text-blue-600 hover:text-blue-800 font-medium flex items-center text-sm sm:text-base" aria-label="Return to questionnaire">
+                                ${icons['chevron-left'] || ''} <span class="hidden sm:inline ml-1">Back to Questionnaire</span>
+                            </button>
+                        </div>
+                    </header>
+                    <div class="container mx-auto max-w-screen-xl p-4 sm:p-6 md:p-8">
+                        <div class="flex flex-col lg:flex-row gap-8">
+                            <div class="lg:w-2/3 space-y-12">
+                                <div>
+                                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Your Personalized Recommendations</h1>
+                                    <p class="text-gray-600 mt-2 text-lg">Based on your business profile, we've found these ideal options for you.</p>
+                                </div>
+                                <section>
+                                    <h2 class="text-2xl font-semibold text-gray-700 mb-6">Top Recommended Account</h2>
+                                    ${recs.top ? `
+                                        <div class="bg-blue-50 border-2 border-blue-500 rounded-xl p-6 shadow-lg">
+                                            <h3 class="text-2xl font-bold text-blue-700 mb-2">${recs.top.name}</h3>
+                                            <p class="text-gray-700 mb-4">${recs.top.targetCustomer}</p>
+                                            <div class="grid md:grid-cols-3 gap-4 mb-6 text-sm">
+                                                <div><strong class="block text-gray-600">Monthly Fee:</strong> <span class="text-gray-800">${topRecDetails.monthlyFee}</span></div>
+                                                <div><strong class="block text-gray-600">Min. Balance to Waive Fee:</strong> <span class="text-gray-800">${topRecDetails.minBalanceToWaive}</span></div>
+                                                <div><strong class="block text-gray-600">Free Transactions:</strong> <span class="text-gray-800">${topRecDetails.freeTransactions}</span></div>
+                                            </div>
+                                            <div class="mb-6">
+                                                <h4 class="font-semibold text-gray-700 mb-2">Key Features:</h4>
+                                                <ul class="list-disc list-inside space-y-1 text-gray-600 text-sm">
+                                                    ${(typeof recs.top.features === 'string' ? recs.top.features : (Array.isArray(recs.top.features) ? recs.top.features.join('; ') : '')).split(/;|,|\n/).map(feature => feature.trim()).filter(f => f).map(feature => `<li>${feature}</li>`).join('')}
+                                                </ul>
+                                            </div>
+                                            ${recs.top.details ? `<div class="mb-6"><h4 class="font-semibold text-gray-700 mb-2">Additional Details:</h4><p class="text-gray-600 text-sm">${recs.top.details}</p></div>` : ''}
+                                            <p class="text-sm text-gray-500 mb-4">Calculated Score: ${recs.top.score}</p>
+                                            <div class="flex flex-col sm:flex-row gap-3">
+                                                <button data-action="toggle-cart-item" data-item-name="${recs.top.name}" data-item-type="${recs.top.price ? 'bundle' : 'product'}" class="w-full sm:w-auto font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition duration-150 ease-in-out ${cart.some(item => item.name === recs.top.name) ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'}">
+                                                    ${cart.some(item => item.name === recs.top.name) ? 'Remove from Cart' : 'Add to Cart'}
+                                                </button>
+                                                 <button onclick="alert('Learn more functionality not implemented yet.')" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition duration-150 ease-in-out">
+                                                    Learn More & Apply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ` : `<p class="text-gray-600 bg-white p-6 rounded-lg shadow">We couldn't find a strong top recommendation. Please review your answers or browse products.</p>`}
+                                </section>
+                                <section class="mb-12">
+                                    <h3 class="text-xl font-semibold text-gray-700 mt-10 mb-4">Other Suitable Options</h3>
+                                    <div class="grid md:grid-cols-2 gap-6">
+                                        ${allRecommendedItems.length > 0 ? allRecommendedItems.map(item => {
+                                            const itemDetailsFromComparison = getProductDetailsFromComparison(item.name);
+                                            return `
+                                            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                                                <h4 class="text-lg font-bold text-gray-800 mb-2">${item.name}</h4>
+                                                <p class="text-sm text-gray-600 mb-3 h-16 overflow-y-auto">${item.targetCustomer || item.description || ''}</p>
+                                                <div class="text-xs text-gray-500 space-y-1 mb-4">
+                                                    <p><strong>Monthly Fee:</strong> ${itemDetailsFromComparison.monthlyFee}</p>
+                                                    <p><strong>Min Balance to Waive:</strong> ${itemDetailsFromComparison.minBalanceToWaive}</p>
+                                                    <p><strong>Free Transactions:</strong> ${itemDetailsFromComparison.freeTransactions}</p>
+                                                    <p><strong>Service Charge:</strong> ${item.serviceCharge || item.price || 'N/A'}</p>
+                                                </div>
+                                                ${item.details ? `<p class="text-xs text-gray-500 mb-2"><strong>Details:</strong> ${item.details.substring(0,100)}${item.details.length > 100 ? '...' : ''}</p>` : ''}
+                                                <p class="text-sm text-gray-500 mb-4">Score: ${item.score}</p>
+                                                <button data-action="toggle-cart-item" data-item-name="${item.name}" data-item-type="${item.price ? 'bundle' : 'product'}" class="text-sm font-semibold py-2 px-4 rounded-lg ${cart.some(cartItem => cartItem.name === item.name) ? 'bg-red-200 hover:bg-red-300 text-red-700' : 'bg-green-200 hover:bg-green-300 text-green-700'}">
+                                                    ${cart.some(cartItem => cartItem.name === item.name) ? 'Remove from Cart' : 'Add to Cart'}
+                                                </button>
+                                            </div>`;
+                                        }).join('') : '<p class="text-gray-600 bg-white p-4 rounded-lg shadow col-span-full">No other specific recommendations at this time.</p>'}
+                                    </div>
+                                </section>
+                                <section class="mb-12">
+                                    <h2 class="text-2xl font-semibold text-gray-700 mb-6">Detailed Comparison</h2>
+                                    ${renderAccountComparisonTable(recs.top?.name)}
+                                </section>
+                                <section>
+                                    <h2 class="text-2xl font-semibold text-gray-700 mb-6">Business Bundle Options</h2>
+                                    <p class="text-gray-600 mb-6">Save on fees by bundling your business checking with additional services:</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        ${businessBundles.map(bundle => {
+                                            const isSelected = selectedBundle && selectedBundle.name === bundle.name;
+                                            return `
+                                            <div class="relative bg-white p-6 rounded-lg shadow-lg border-2 ${isSelected ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-200 hover:border-blue-300'}">
+                                                ${isSelected ? '<span class="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">Selected</span>' : (bundle.popular ? '<span class="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">Popular</span>' : '')}
+                                                <h3 class="text-xl font-bold text-gray-800 mb-1">${bundle.name}</h3>
+                                                <p class="text-sm text-gray-500 mb-3 h-10 overflow-hidden">${bundle.description}</p>
+                                                <p class="text-3xl font-extrabold text-gray-900 mb-1">${bundle.price}</p>
+                                                <p class="text-xs text-gray-500 mb-1">Waived with ${bundle.waivedWith}</p>
+                                                ${bundle.monthlyDetail ? `<p class="text-xs text-gray-500 mb-1">${bundle.monthlyDetail}</p>` : ''}
+                                                <ul class="space-y-2 text-sm text-gray-600 mb-6 mt-3">
+                                                    ${bundle.features.map(feature => `
+                                                        <li class="flex items-start">${icons['check-circle'] ? icons['check-circle'].replace('w-6 h-6', 'w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0') : '*'}<span>${feature}</span></li>`).join('')}
+                                                </ul>
+                                                <button data-action="select-bundle" data-bundle-name="${bundle.name}" class="w-full font-semibold py-2.5 px-4 rounded-lg transition duration-150 ease-in-out ${isSelected ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'}" aria-label="${isSelected ? 'Deselect' : 'Select'} ${bundle.name} bundle">
+                                                    ${isSelected ? 'Deselect Bundle' : 'Select Bundle'}
+                                                </button>
+                                            </div>`;
+                                        }).join('')}
+                                    </div>
+                                </section>
+                                <section>
+                                    <h2 class="text-2xl font-semibold text-gray-700 mb-6">Explore Additional Products & Services</h2>
+                                    ${renderProductExplorerSection()}
+                                </section>
+                            </div>
+                            <div class="lg:w-1/3">
+                                <div class="sticky top-20">
+                                    ${renderOrderSummary()}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-12 text-center">
+                             <button data-action="navigate-to-questionnaire" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg shadow-sm hover:shadow transition duration-150 ease-in-out mr-4">
+                                Restart Questionnaire
+                            </button>
+                            <button data-action="navigate-to-landing" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg shadow-sm hover:shadow transition duration-150 ease-in-out">
+                                Back to All Products
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProductExplorerSection() {
+            const currentProducts = activeTab === 'business' ? productsData.filter(p => p.productCategory === 'business') : productsData.filter(p => p.productCategory === 'personal');
+            const filteredProducts = currentProducts.filter(product =>
+                product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                product.targetCustomer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (typeof product.features === 'string' && product.features.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+            return `
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="mb-6 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">${icons['search']}</div>
+                        <input type="text" id="product-search-recommendations" placeholder="Search products..."
+                            class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            value="${searchTerm}" data-action="search-products" aria-label="Search products">
+                    </div>
+                    <div class="mb-6 border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button data-action="set-active-tab" data-tab-name="business" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'business' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Business</button>
+                            <button data-action="set-active-tab" data-tab-name="personal" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'personal' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Personal</button>
+                        </nav>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product/Service</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fee</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${filteredProducts.length === 0 ? `<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">No products match.</td></tr>` :
+                                filteredProducts.map(product => `
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">${product.name}<p class="text-xs text-gray-500">${(product.features || '').substring(0,70)}${(product.features || '').length > 70 ? '...' : ''}</p></td>
+                                        <td class="px-6 py-4 whitespace-normal text-sm text-gray-500">${product.targetCustomer}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.serviceCharge}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <button data-action="toggle-cart-item" data-item-name="${product.name}" data-item-type="product" class="px-3 py-1.5 rounded-md font-semibold text-xs transition ${cart.some(ci => ci.name === product.name && ci.type === 'product') ? 'bg-red-100 hover:bg-red-200 text-red-700' : 'bg-green-100 hover:bg-green-200 text-green-700'}">
+                                                ${cart.some(ci => ci.name === product.name && ci.type === 'product') ? 'Remove' : 'Add'}
+                                            </button>
+                                        </td>
+                                    </tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderOrderSummary() {
+            const totals = calculateTotals();
+            let summaryHtml = `
+                <div class="bg-gradient-to-br from-blue-700 to-indigo-800 text-white rounded-2xl w-full max-h-[calc(100vh-120px)] h-full shadow-2xl flex flex-col">
+                    <div class="p-5 border-b border-blue-500"><span class="text-2xl font-bold">Order Summary</span></div>
+                    <div class="flex-grow overflow-y-auto p-5 space-y-4 text-sm">`;
+            if (totals.selectedBundleInfo) {
+                const bundle = totals.selectedBundleInfo;
+                summaryHtml += `<div><p class="font-semibold text-blue-100 mb-0.5">Selected Bundle:</p><div class="flex justify-between w-full"><p class="mb-0">${bundle.name}</p><p class="mb-0">$${bundle.parsedPrice.amount.toFixed(2)}${bundle.parsedPrice.frequency === 'monthly' ? '/mo' : (bundle.parsedPrice.frequency === 'yearly' ? '/yr' : (bundle.parsedPrice.amount > 0 ? ' one-time' : ''))}</p></div>
+                    ${bundle.features && bundle.features.length > 0 ? `<ul class="mt-1.5 text-xs list-disc list-inside text-blue-300 space-y-0.5 pl-1">${bundle.features.slice(0, 2).map(f => `<li>${f.length > 30 ? f.substring(0, 27) + '...' : f}</li>`).join('')}${bundle.features.length > 2 ? `<li class="italic">...and more</li>` : ''}</ul>` : ''}</div>`;
+            } else if (cart.length === 0) {
+                 summaryHtml += `<div><p class="text-blue-200">No bundle selected.</p></div>`;
+            }
+            if (totals.otherMonthlyItems.length > 0) {
+                summaryHtml += `<div><p class="font-semibold text-blue-100 mb-1">Additional Monthly Fees:</p><div class="space-y-0.5">`;
+                totals.otherMonthlyItems.forEach(item => {
+                     let feeDisplay = `$${item.fee.amount.toFixed(2)}/mo`;
+                     if (item.fee.frequency === 'included') feeDisplay = item.fee.original || 'Included';
+                     else if (item.fee.amount === 0 && item.fee.original && !item.fee.original.toLowerCase().includes('included') && !item.fee.original.toLowerCase().includes('contact')) feeDisplay = item.fee.original;
+                    summaryHtml += `<div class="text-blue-200 border-b border-blue-600/50 pb-1.5 mb-1.5"><div class="flex justify-between w-full"><p class="mb-0 font-medium truncate" title="${item.name}">${item.name.length > 20 ? item.name.substring(0,18)+'...' : item.name}</p><p class="mb-0">${feeDisplay}</p></div>${item.features ? `<p class="text-xs text-blue-300 truncate" title="${item.features}">${item.features.length > 35 ? item.features.substring(0,32)+'...' : item.features}</p>` : ''}</div>`;
+                });
+                summaryHtml += `</div></div>`;
+            }
+            if (totals.otherYearlyItems.length > 0) {
+                summaryHtml += `<div><p class="font-semibold text-blue-100 mb-1">Additional Yearly Fees:</p><div class="space-y-0.5">`;
+                totals.otherYearlyItems.forEach(item => {
+                     let feeDisplay = `$${item.fee.amount.toFixed(2)}/yr`;
+                     if (item.fee.frequency === 'included') feeDisplay = item.fee.original || 'Included';
+                     else if (item.fee.amount === 0 && item.fee.original && !item.fee.original.toLowerCase().includes('included') && !item.fee.original.toLowerCase().includes('contact')) feeDisplay = item.fee.original;
+                    summaryHtml += `<div class="text-blue-200 border-b border-blue-600/50 pb-1.5 mb-1.5"><div class="flex justify-between w-full"><p class="mb-0 font-medium truncate" title="${item.name}">${item.name.length > 20 ? item.name.substring(0,18)+'...' : item.name}</p><p class="mb-0">${feeDisplay}</p></div>${item.features ? `<p class="text-xs text-blue-300 truncate" title="${item.features}">${item.features.length > 35 ? item.features.substring(0,32)+'...' : item.features}</p>` : ''}</div>`;
+                });
+                summaryHtml += `</div></div>`;
+            }
+            if (totals.otherOnetimeItems.length > 0) {
+                summaryHtml += `<div><p class="font-semibold text-blue-100 mb-1">One-Time Fees:</p><div class="space-y-0.5">`;
+                totals.otherOnetimeItems.forEach(item => {
+                     let feeDisplay = `$${item.fee.amount.toFixed(2)}`;
+                     if (item.fee.frequency === 'included') feeDisplay = item.fee.original || 'Included';
+                     else if (item.fee.amount === 0 && item.fee.original && !item.fee.original.toLowerCase().includes('included') && !item.fee.original.toLowerCase().includes('contact')) feeDisplay = item.fee.original;
+                    if (item.fee.frequency === 'onetime' || item.fee.frequency === 'included') {
+                        summaryHtml += `<div class="text-blue-200 border-b border-blue-600/50 pb-1.5 mb-1.5"><div class="flex justify-between w-full"><p class="mb-0 font-medium truncate" title="${item.name}">${item.name.length > 20 ? item.name.substring(0,18)+'...' : item.name}</p><p class="mb-0">${feeDisplay}</p></div>${item.features ? `<p class="text-xs text-blue-300 truncate" title="${item.features}">${item.features.length > 35 ? item.features.substring(0,32)+'...' : item.features}</p>` : ''}</div>`;
+                    }
+                });
+                summaryHtml += `</div></div>`;
+            }
+            if (cart.length === 0 && !selectedBundle) {
+                 summaryHtml += `<div><p class="text-blue-200 italic">Your cart is empty.</p></div>`;
+            }
+            summaryHtml += `</div>
+                    <div class="p-5 mt-auto border-t border-blue-500 space-y-3">
+                        <div class="flex justify-between w-full text-base font-semibold text-blue-100"><p class="mb-0">Subtotal Monthly:</p><p class="mb-0">$${totals.monthlyTotal}</p></div>
+                        <div class="flex justify-between w-full text-base font-semibold text-blue-100"><p class="mb-0">Subtotal Yearly:</p><p class="mb-0">$${totals.yearlyTotal}</p></div>
+                        <div class="flex flex-row justify-between items-baseline text-white pt-2 border-t border-blue-600"><strong class="text-xl font-bold">Total Estimate:</strong><div class="text-right"><strong class="text-2xl total font-bold">$${totals.grandTotal}</strong><p class="text-xs text-blue-300">/mo (annualized)</p></div></div>
+                        <button onclick="alert('Proceed to checkout/application not implemented.')" class="mt-4 w-full !capitalize !rounded-lg text-blue-700 font-semibold text-lg bg-white hover:bg-gray-200 p-3.5 focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50">Proceed with Selected</button>
+                    </div></div>`;
+            return summaryHtml;
+        }
+
+        function renderSettingsPage() {
+            return `
+                <header class="bg-white shadow-sm sticky top-0 z-30">
+                    <div class="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                        <button data-action="toggle-nav-drawer" class="nav-drawer-toggle-header p-2 text-gray-600 hover:text-blue-600 md:hidden">
+                            ${icons['menu']}
+                        </button>
+                        <div class="text-xl sm:text-2xl font-bold text-blue-700 cursor-pointer flex-1 md:flex-none text-center md:text-left" data-action="navigate-to-landing">AccountFinder Pro - Settings</div>
+                        <div class="md:hidden w-10"></div> <!-- Spacer -->
+                    </div>
+                </header>
+                <div class="container mx-auto p-6">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Questionnaire Settings</h1>
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Current Questions</h2>
+                        ${questionnaireSteps.length > 0 ? `
+                            <ul class="divide-y divide-gray-200">
+                                ${questionnaireSteps.map((step, index) => `
+                                    <li class="py-3 flex justify-between items-center">
+                                        <div>
+                                            <p class="font-medium text-gray-800">${step.title} (ID: ${step.id})</p>
+                                            <p class="text-sm text-gray-600">${step.questionText}</p>
+                                        </div>
+                                        <button data-action="remove-question" data-question-id="${step.id}" class="text-red-500 hover:text-red-700 text-sm font-medium">Remove</button>
+                                    </li>`).join('')}
+                            </ul>` : '<p class="text-gray-500">No questions defined yet.</p>'}
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Add New Question</h2>
+                        <form id="add-question-form" class="space-y-4">
+                            <div><label for="q-id" class="block text-sm font-medium text-gray-700">ID (unique, e.g., 'industryType')</label><input type="text" id="q-id" name="id" required class="mt-1 block w-full input-field"></div>
+                            <div><label for="q-title" class="block text-sm font-medium text-gray-700">Title (sidebar, e.g., 'Industry Type')</label><input type="text" id="q-title" name="title" required class="mt-1 block w-full input-field"></div>
+                            <div><label for="q-icon" class="block text-sm font-medium text-gray-700">Icon (e.g., 'briefcase', optional)</label><input type="text" id="q-icon" name="icon" class="mt-1 block w-full input-field"></div>
+                            <div><label for="q-text" class="block text-sm font-medium text-gray-700">Question Text</label><textarea id="q-text" name="questionText" required rows="2" class="mt-1 block w-full input-field"></textarea></div>
+                            <div><label for="q-subtext" class="block text-sm font-medium text-gray-700">Question Subtext</label><textarea id="q-subtext" name="questionSubtext" rows="2" class="mt-1 block w-full input-field"></textarea></div>
+                            <div><label for="q-options" class="block text-sm font-medium text-gray-700">Options (JSON format)</label><textarea id="q-options" name="options" required rows="3" class="mt-1 block w-full input-field" placeholder='[{"id":"opt1", "title":"Opt 1", "description":"Desc 1", "icon":"briefcase"}]'></textarea><p class="text-xs text-gray-500 mt-1">Example: [{"id":"val1", "title":"Value 1", "description":"Optional description"}]</p></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label for="q-prev" class="block text-sm font-medium text-gray-700">Prev Button Text</label><input type="text" id="q-prev" name="prevButtonText" class="mt-1 block w-full input-field"></div>
+                                <div><label for="q-next" class="block text-sm font-medium text-gray-700">Next Button Text</label><input type="text" id="q-next" name="nextButtonText" class="mt-1 block w-full input-field"></div>
+                                <div><label for="q-skip" class="block text-sm font-medium text-gray-700">Skip Button Text</label><input type="text" id="q-skip" name="skipButtonText" class="mt-1 block w-full input-field"></div>
+                                <div><label for="q-final" class="block text-sm font-medium text-gray-700">Final Button Text</label><input type="text" id="q-final" name="finalButtonText" class="mt-1 block w-full input-field"></div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center"><input id="q-multi-select" name="isMultiSelect" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"><label for="q-multi-select" class="ml-2 block text-sm text-gray-900">Multi-select</label></div>
+                                <div class="flex items-center"><input id="q-required" name="required" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"><label for="q-required" class="ml-2 block text-sm text-gray-900">Required</label></div>
+                            </div>
+                            <button type="submit" data-action="add-question" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md">Add Question</button>
+                        </form>
+                    </div>
+                     <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Manage Data</h2>
+                        <button data-action="download-csv" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md">Download Current Data as CSV</button>
+                        <p class="text-xs text-gray-500 mt-2">Download all current products, questions, and comparison data. You can modify this file and re-upload it on the home page.</p>
+                    </div>
+                </div>
+                <style>.input-field { padding: 0.5rem 0.75rem; border: 1px solid #D1D5DB; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); width: 100%; } .input-field:focus { outline: none; border-color: #2563EB; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); }</style>
+            `;
+        }
+
+        function handleAddQuestion(event) {
+            event.preventDefault();
+            const form = event.target.closest('form#add-question-form');
+            if (!form) return;
+            const formData = new FormData(form);
+            const newQuestion = {
+                id: formData.get('id'), title: formData.get('title'), icon: formData.get('icon') || 'help-circle',
+                questionText: formData.get('questionText'), questionSubtext: formData.get('questionSubtext') || '',
+                isMultiSelect: formData.get('isMultiSelect') === 'on', required: formData.get('required') === 'on',
+                nextButtonText: formData.get('nextButtonText') || null, skipButtonText: formData.get('skipButtonText') || null,
+                prevButtonText: formData.get('prevButtonText') || null, finalButtonText: formData.get('finalButtonText') || null,
+            };
+            try {
+                newQuestion.options = JSON.parse(formData.get('options'));
+                if (!Array.isArray(newQuestion.options) || !newQuestion.options.every(opt => opt.id && opt.title)) {
+                    throw new Error("Options JSON: array of objects, each with 'id' and 'title'.");
+                }
+            } catch (e) {
+                showSnackbar(`Error parsing options JSON: ${e.message}`); return;
+            }
+            if (!newQuestion.id || !newQuestion.title || !newQuestion.questionText) {
+                showSnackbar("ID, Title, and Question Text are required."); return;
+            }
+            if (questionnaireSteps.some(q => q.id === newQuestion.id)) {
+                showSnackbar(`Question ID "${newQuestion.id}" already exists.`); return;
+            }
+            questionnaireSteps.push(newQuestion);
+            showSnackbar(`Question "${newQuestion.title}" added.`);
+            form.reset();
+            render();
+        }
+
+        function handleRemoveQuestion(questionId) {
+            questionnaireSteps = questionnaireSteps.filter(step => step.id !== questionId);
+            showSnackbar(`Question ID "${questionId}" removed.`);
+            render();
+        }
+
+        function convertDataToCsv() {
+            let csvString = "dataType,productCategory,name,targetCustomer,features,serviceCharge,details,questionId,icon,questionText,questionSubtext,options,isMultiSelect,required,nextButtonText,skipButtonText,prevButtonText,finalButtonText";
+            accountNamesForComparison.forEach(accName => { csvString += `,${accName.replace(/,/g, '')}`; });
+            csvString += "\n";
+            productsData.forEach(p => {
+                csvString += `product,${p.productCategory || ''},"${p.name || ''}","${p.targetCustomer || ''}","${(typeof p.features === 'string' ? p.features : JSON.stringify(p.features)) || ''}","${p.serviceCharge || ''}","${p.details || ''}",,,,,,,,,,,,,${','.repeat(accountNamesForComparison.length)}\n`;
+            });
+            questionnaireSteps.forEach(q => {
+                const optionsJson = JSON.stringify(q.options || []).replace(/"/g, '""');
+                csvString += `question,,,"${q.id || ''}","${q.icon || ''}","${q.questionText || ''}","${q.questionSubtext || ''}","${optionsJson}",${q.isMultiSelect || false},${q.required || false},"${q.nextButtonText || ''}","${q.skipButtonText || ''}","${q.prevButtonText || ''}","${q.finalButtonText || ''}",${','.repeat(accountNamesForComparison.length)}\n`;
+            });
+            accountComparisonData.forEach(cf => {
+                csvString += `comparisonfeature,,,"${cf.feature || ''}",,,,,,,,,,,,`;
+                cf.values.forEach(val => { csvString += `,"${val || ''}"`; });
+                csvString += "\n";
+            });
+            return csvString;
+        }
+
+        function downloadCsv(filename = 'account_finder_data.csv') {
+            const csvData = convertDataToCsv();
+            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                showSnackbar("Data downloaded as CSV.");
+            } else {
+                showSnackbar("CSV download not supported by your browser.");
+            }
+        }
+        function calculateTotals() {
+            let monthlyTotal = 0, yearlyTotal = 0;
+            const otherMonthlyItems = [], otherYearlyItems = [], otherOnetimeItems = [];
+            if (selectedBundle) {
+                const bundleFee = parseFee(selectedBundle.price);
+                if (bundleFee.frequency === 'monthly') monthlyTotal += bundleFee.amount;
+                else if (bundleFee.frequency === 'yearly') yearlyTotal += bundleFee.amount;
+            }
+            cart.forEach(item => {
+                const chargeString = typeof item.serviceCharge === 'string' ? item.serviceCharge : '';
+                const itemFee = parseFee(chargeString);
+                const cartItem = { name: item.name, fee: itemFee, features: typeof item.features === 'string' ? item.features : (Array.isArray(item.features) ? item.features.join('; ') : ''), details: item.details || '', type: item.type };
+                if (itemFee.frequency === 'monthly') { monthlyTotal += itemFee.amount; otherMonthlyItems.push(cartItem); }
+                else if (itemFee.frequency === 'yearly') { yearlyTotal += itemFee.amount; otherYearlyItems.push(cartItem); }
+                else if (itemFee.frequency === 'onetime' && itemFee.amount > 0) otherOnetimeItems.push(cartItem);
+                else if (itemFee.frequency === 'included' || itemFee.amount === 0) {
+                    if (item.serviceCharge && typeof item.serviceCharge === 'string') {
+                        const lowerOriginal = item.serviceCharge.toLowerCase();
+                        if (lowerOriginal.includes('month')) otherMonthlyItems.push(cartItem);
+                        else if (lowerOriginal.includes('year') || lowerOriginal.includes('annual')) otherYearlyItems.push(cartItem);
+                        else otherOnetimeItems.push(cartItem);
+                    } else otherOnetimeItems.push(cartItem);
+                }
+            });
+            let onetimeTotalForAnnualization = 0;
+            otherOnetimeItems.forEach(item => { if (item.fee && typeof item.fee.amount === 'number' && item.fee.frequency === 'onetime') onetimeTotalForAnnualization += item.fee.amount; });
+            return { monthlyTotal: monthlyTotal.toFixed(2), yearlyTotal: yearlyTotal.toFixed(2), grandTotal: (monthlyTotal + (yearlyTotal / 12) + (onetimeTotalForAnnualization / 12)).toFixed(2), selectedBundleInfo: selectedBundle ? { ...selectedBundle, parsedPrice: parseFee(selectedBundle.price) } : null, otherMonthlyItems, otherYearlyItems, otherOnetimeItems };
+        }
+
+        // --- Main Render Function ---
+        function render() {
+            const app = document.getElementById('app');
+            if (!app) { console.error("App container not found!"); return; }
+
+            if (currentPage === 'landing') app.innerHTML = renderLandingPage();
+            else if (currentPage === 'questionnaire') app.innerHTML = renderQuestionnaire();
+            else if (currentPage === 'recommendations') app.innerHTML = renderRecommendationsPage();
+            else if (currentPage === 'settings') app.innerHTML = renderSettingsPage();
+            else app.innerHTML = '<div class="text-center p-6 text-red-500">Page not found.</div>';
+
+            if (currentPage === 'recommendations' || currentPage === 'landing' || currentPage === 'settings') {
+                const searchInputId = currentPage === 'landing' ? 'product-search' : (currentPage === 'recommendations' ? 'product-search-recommendations' : null);
+                if (searchInputId) {
+                    const searchInput = document.getElementById(searchInputId);
+                    if (searchInput) searchInput.value = searchTerm;
+                }
+            }
+            updateNavActiveStates(); // Update active states for rail/drawer
+            updateAppContainerMargin(); // Adjust app margin for rail
+        }
+
+        const debouncedRender = debounce(render, 300);
+
+        // --- Event Delegation Setup ---
+        document.body.addEventListener('click', (event) => {
+            const target = event.target;
+            const actionElement = target.closest('[data-action]');
+            if (!actionElement) return;
+            const action = actionElement.dataset.action;
+
+            if (action === 'toggle-nav-drawer') toggleNavDrawer();
+            else if (action === 'toggle-nav-rail') toggleNavRail();
+            else if (action.startsWith('navigate-to-')) {
+                const page = action.replace('navigate-to-', '').replace('-drawer', '').replace('-rail', '');
+                if (isDrawerOpen && action.includes('-drawer')) toggleNavDrawer();
+                // Rail navigation doesn't need to close the rail, just navigate.
+                navigateTo(page);
+            } else if (action === 'set-step-index') {
+                if (!actionElement.classList.contains('disabled')) {
+                    const index = parseInt(actionElement.dataset.stepIndexVal);
+                    if (!isNaN(index)) setStepIndex(index);
+                }
+            } else if (action === 'set-step-change') {
+                const change = parseInt(actionElement.dataset.change);
+                if (!isNaN(change)) setStepIndex(currentStepIndex + change);
+            } else if (action === 'handle-option-click') {
+                handleOptionClick(actionElement.dataset.stepId, actionElement.dataset.optionId, actionElement.dataset.isMultiSelect === 'true');
+            } else if (action === 'reset-current-step') {
+                const currentStep = questionnaireSteps[currentStepIndex];
+                if (currentStep) { answers[currentStep.id] = currentStep.isMultiSelect ? [] : null; render(); }
+            } else if (action === 'set-active-tab') {
+                setActiveTab(actionElement.dataset.tabName);
+            } else if (action === 'toggle-cart-item') {
+                toggleCartItem(actionElement.dataset.itemName, actionElement.dataset.itemType || 'product');
+            } else if (action === 'select-bundle') {
+                selectBundle(actionElement.dataset.bundleName);
+            } else if (action === 'add-question') {
+                handleAddQuestion(event);
+            } else if (action === 'remove-question') {
+                const questionId = actionElement.dataset.questionId;
+                if (questionId) handleRemoveQuestion(questionId);
+            } else if (action === 'download-csv') {
+                downloadCsv();
+            }
+        });
+
+        document.body.addEventListener('input', (event) => {
+            const target = event.target;
+            if (target.dataset.action === 'search-products' || target.id === 'product-search' || target.id === 'product-search-recommendations') {
+                searchTerm = target.value;
+                debouncedRender();
+            }
+        });
+
+        // --- Initialization on DOMContentLoaded ---
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const navRail = document.getElementById('nav-rail');
+            
+            // Setup Nav Rail Toggle Icon
+            const railToggleButton = document.getElementById('nav-rail-toggle');
+            if (navRail && railToggleButton) {
+                navRail.classList.toggle('expanded', isRailExpanded); // Ensure nav-rail itself has the correct class
+                
+                railToggleButton.innerHTML = isRailExpanded ? (icons['chevron-left'] || '&lt;') : (icons['menu'] || '☰');
+                 railToggleButton.setAttribute('aria-label', isRailExpanded ? 'Collapse navigation rail' : 'Expand navigation rail');
+            }
+            // Setup Nav Drawer Close Icon
+            const drawerCloseButton = document.querySelector('#nav-drawer .nav-drawer-header button[data-action="toggle-nav-drawer"]');
+            if(drawerCloseButton) drawerCloseButton.innerHTML = icons['x'] || 'X';
+
+            // Setup Nav Icons
+            const setupNavIcons = (navSelector, iconMap) => {
+                Object.entries(iconMap).forEach(([actionSuffix, iconName]) => {
+                    const item = document.querySelector(`${navSelector} [data-action$="-${actionSuffix}"]`);
+                    const iconPlaceholder = item?.querySelector('.nav-rail-icon-placeholder') || item?.firstChild; // For drawer, icon might be first child
+                    if (item && icons[iconName]) {
+                        if(item.classList.contains('nav-rail-item') && iconPlaceholder && iconPlaceholder.classList.contains('nav-rail-icon-placeholder')) {
+                             iconPlaceholder.innerHTML = icons[iconName];
+                        } else if (item.classList.contains('nav-drawer-item') && iconPlaceholder) {
+                            // For drawer, prepend icon if not already there or replace placeholder
+                            const existingIcon = item.querySelector('svg');
+                            if (existingIcon) existingIcon.remove();
+                            item.insertAdjacentHTML('afterbegin', icons[iconName].replace('class="w-6 h-6', 'class="w-5 h-5 mr-3'));
+                        }
+                    }
+                });
+            };
+
+            setupNavIcons('#nav-rail', { home: 'home-alt', questionnaire: 'list', settings: 'settings-alt' });
+            setupNavIcons('#nav-drawer .nav-drawer-content', { home: 'home-alt', questionnaire: 'list', settings: 'settings-alt' });
+
+
+            const fileInput = document.getElementById('csvFileInput');
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) { showSnackbar("No file selected."); return; }
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = parseCsv(e.target.result);
+                            if (data.products.business.length > 0 || data.products.personal.length > 0) productsData = [...data.products.business, ...data.products.personal]; else console.warn("CSV: No product data. Using fallback.");
+                            if (data.questions.length > 0) { questionnaireSteps = data.questions; currentStepIndex = 0; answers = {}; } else console.warn("CSV: No question data. Using fallback.");
+                            if (data.comparison.length > 0) accountComparisonData = data.comparison; else console.warn("CSV: No comparison data. Using fallback.");
+                            showSnackbar("CSV loaded successfully! Data updated.");
+                            navigateTo('landing');
+                        } catch (error) {
+                            showSnackbar(`Error loading CSV: ${error.message}. Check format. Using current data.`);
+                            console.error("CSV Load Error:", error);
+                            render();
+                        }
+                    };
+                    reader.readAsText(file);
+                });
+            }
+            render(); // Initial render
+            window.addEventListener('resize', debounce(() => {
+                updateAppContainerMargin();
+                // Potentially re-evaluate rail vs drawer visibility if not purely CSS driven
+            }, 100));
+        });
+    </script>
+</body>
+</html>
