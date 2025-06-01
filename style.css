@@ -119,11 +119,12 @@ html {
 /* Main Header Search Box (Desktop) */
 .header-search {
    /* position: static; */
-    display: flex;
+    display: block;
     align-items: center;
-    flex-grow: 0;
-   /*  max-width: 320px;
-    margin-left: auto; */
+    flex-grow: 1;
+     max-width: 300px;
+   margin-left: auto;
+    margin-right: auto;
 }
 .header-search input {
     width: 100%;
@@ -641,7 +642,7 @@ html {
 @media (max-width: 768px) {
     .header-inner {
        /* display: flex; */
-        align-items: center; /* Vertically center items */
+        align-items: left; /* Vertically center items */
         justify-content: flex-start; /* Align items to the left */
         
         gap: 0.5rem;
@@ -651,13 +652,15 @@ html {
     .header-search,
     .header-version-selector {
        /*  display: none; */
-        display: flex;
-    align-items: center;
+        display: left;
+    align-items: left;
+    text-align: left;
     flex-grow: 1;
+   flex-shrink: 1;
     }
     
     .site-logo {
-        flex-grow: 1;
+       /*  flex-grow: 1;  */
         text-align: left;
         order: 0; /* Keep logo on the left */
         /* position: static;  Remove absolute positioning on small screens */
