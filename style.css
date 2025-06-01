@@ -81,8 +81,11 @@ html {
 .header-inner {
     width: 100%;
     display: flex;
-    align-items: center;
+    align-items: center; /* Vertically center items */
+    justify-content: center; /* Horizontally center items */
     gap: 1rem;
+    padding: 10px 20px; /* Adjust padding as needed */
+    position: relative; /* For potential absolute positioning of children */
 }
 
 .site-logo {
@@ -90,6 +93,8 @@ html {
     font-weight: 600;
     color: var(--color-text-primary);
     flex-shrink: 0;
+    position: absolute;
+    left: 20px; /* Keep the logo on the left */
 }
 
 .header-version-selector {
@@ -157,6 +162,7 @@ html {
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s;
+    order: 0; /* Ensure it appears in the correct order in flex */
 }
 .menu-toggle svg {
     stroke: var(--color-text-primary);
@@ -630,7 +636,7 @@ html {
 
 @media (max-width: 768px) {
     .header-inner {
-        flex-wrap: wrap;
+        
         justify-content: flex-start;
         gap: 0.5rem;
         flex-direction: column; /* Stack vertically on smaller screens */
@@ -638,9 +644,10 @@ html {
     .site-logo {
         flex-grow: 1;
         text-align: left;
+        position: static; /* Remove absolute positioning on small screens */
     }
     .menu-toggle {
-        margin-right: 0.5rem;
+       margin-right: 10px; /* Add some spacing between the hamburger and logo */
     }
     .sidebar, .toc-container {
         width: 100%; /* Full width on smaller screens */
