@@ -72,10 +72,12 @@ html {
     padding: 0 1.5rem 0 2rem;
     height: var(--header-height);
     display: flex;
-    align-items: center;
+    align-items: left;
     position: relative;
     top: 0;
     z-index: 1000;
+    
+    justify-content: flex-start; /* Align items to the left */
 }
 
 .header-inner {
@@ -118,11 +120,11 @@ html {
 
 /* Main Header Search Box (Desktop) */
 .header-search {
-   /* position: static; */
+    position: static; 
     display: block;
-    align-items: center;
+    align-items: left;
     flex-grow: 1;
-     max-width: 300px;
+     max-width: 400px;
    margin-left: auto;
     margin-right: auto;
 }
@@ -156,15 +158,15 @@ html {
 
 /* Hamburger menu for mobile */
 .menu-toggle {
-    display: flex;
+    display: flex-start;
     background-color: transparent;
     border: 1px solid transparent;
     padding: 0.5rem;
-    border-radius: 6px;
+    border-radius: 1px;
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s;
     order: 0; /* Ensure it appears in the correct order in flex */
-   /* margin-right: 10px;  Space between hamburger and logo */ 
+    margin-right: 5px; /* Space between hamburger and logo */ 
 }
 .menu-toggle svg {
     stroke: var(--color-text-primary);
@@ -652,9 +654,9 @@ html {
     .header-search,
     .header-version-selector {
        /*  display: none; */
-        display: left;
-    align-items: left;
-    text-align: left;
+        display:  flex-start;
+    align-items:  flex-start;
+    text-align:  left;
     flex-grow: 1;
    flex-shrink: 1;
     }
@@ -666,7 +668,7 @@ html {
         /* position: static;  Remove absolute positioning on small screens */
     }
     .menu-toggle {
-       margin-right: 10px; /* Add some spacing between the hamburger and logo */
+       margin-right: 1px; /* Add some spacing between the hamburger and logo */
     }
     .sidebar, .toc-container {
         width: 100%; /* Full width on smaller screens */
