@@ -84,6 +84,7 @@ html {
     padding: 0 1rem; /* Reduced padding for tighter layout */
     max-width: 1200px; /* Constrain width for larger screens */
     margin: 0 auto; /* Center the header content */
+    align-content: start;
 }
 
 /* Hamburger Menu */
