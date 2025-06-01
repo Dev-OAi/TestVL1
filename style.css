@@ -553,7 +553,7 @@ html {
 
     .header-search,
     .header-version-selector {
-        /* display: none; */
+         display: flex 2; 
     }
 
     .menu-toggle {
