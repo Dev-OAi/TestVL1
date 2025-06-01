@@ -3,8 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>My Custom Docs Site</title>
-    <link rel="icon" type="image/png" href="/assets/cb-345/images/site/favicon.png"> <link rel="stylesheet" href="style.css">
+    <title>GitHub Docs Clone</title> <link rel="icon" type="image/png" href="/assets/cb-345/images/site/favicon.png"> <link rel="stylesheet" href="style.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     
@@ -53,36 +52,16 @@
                     </svg>
                 </button>
 
-                <a href="/" class="site-logo">My Docs</a>
+                <a href="/" class="site-logo">GitHub Docs</a>
 
-                <div class="header-search-mobile">
-                    <input type="text" placeholder="Search documentation...">
-                    <button class="search-button" aria-label="Search">
-                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                    </button>
-                </div>
-                
-                <nav class="header-nav">
-                    <ul>
-                        <li><a href="#">Products</a></li>
-                        <li><a href="#">Solutions</a></li>
-                        <li><a href="#">Pricing</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
-
-        <div class="main-layout">
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <a href="#" class="sidebar-title">GitHub Docs</a>
-                    <div class="sidebar-version">Version: Free, Pro, & Team</div>
+                <div class="header-version-selector">
+                    <span>Version: Free, Pro, & Team</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
                 </div>
 
-                <div class="sidebar-search">
+                <div class="header-search">
                     <input type="text" placeholder="Search or ask Copilot">
                     <button class="search-button" aria-label="Search">
                         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -91,7 +70,11 @@
                         </svg>
                     </button>
                 </div>
+            </div>
+        </header>
 
+        <div class="main-layout">
+            <aside class="sidebar">
                 <nav class="sidebar-nav">
                     <ul>
                         <li><a href="#" class="sidebar-link active">
