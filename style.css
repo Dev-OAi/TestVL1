@@ -121,7 +121,7 @@ html {
    /* position: static; */
     display: flex;
     align-items: center;
-    flex-grow: 1;
+    flex-grow: 0;
    /*  max-width: 320px;
     margin-left: auto; */
 }
@@ -562,6 +562,9 @@ html {
     .header-search,
     .header-version-selector {
        /*  display: none; */
+        display: flex;
+    align-items: center;
+    flex-grow: 1;
     }
 
     .menu-toggle {
@@ -644,6 +647,15 @@ html {
         gap: 0.5rem;
       /*   flex-direction: column; Stack vertically on smaller screens */
     }
+
+    .header-search,
+    .header-version-selector {
+       /*  display: none; */
+        display: flex;
+    align-items: center;
+    flex-grow: 1;
+    }
+    
     .site-logo {
         flex-grow: 1;
         text-align: left;
