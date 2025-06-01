@@ -16,6 +16,9 @@
     --color-active-link-bg: #3a3a3a; /* Background for active sidebar link */
     --color-active-link-text: #ffffff; /* Text color for active link */
     --color-active-link-arrow: #58a6ff; /* Color for the active link arrow */
+
+    /* Header height variable for layout calculation */
+    --header-height: 60px; /* Approximate height of the GitHub Docs header */
 }
 
 body {
@@ -59,16 +62,14 @@ html {
     scrollbar-color: #555 transparent; /* thumb color track color */
 }
 
-/* --- Basic Reset Enhancements --- */
-button {
-    font-size: inherit;
-}
-
 /* --- Header --- */
 .site-header {
     background-color: var(--color-bg-primary);
     border-bottom: 1px solid var(--color-border-light);
-    padding: 1rem 1.5rem;
+    padding: 0 1.5rem; /* Remove top/bottom padding here */
+    height: var(--header-height); /* Fixed height */
+    display: flex; /* Make it a flex container */
+    align-items: center; /* Center items vertically */
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -77,6 +78,7 @@ button {
 .header-inner {
     max-width: 1200px; /* Still keeps header content aligned like GitHub Docs */
     margin: 0 auto;
+    width: 100%; /* Ensure it takes full width within its max-width */
     display: flex;
     align-items: center;
     gap: 1.5rem; /* Space between elements */
@@ -97,12 +99,12 @@ button {
     color: var(--color-text-secondary);
     padding: 0.5rem 0.75rem;
     border-radius: 6px;
-    background-color: transparent; /* No background by default */
+    background-color: transparent;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
 }
 .header-version-selector:hover {
-    background-color: var(--color-bg-tertiary); /* Hover background */
+    background-color: var(--color-bg-tertiary);
 }
 .header-version-selector svg {
     stroke: var(--color-text-secondary);
@@ -111,7 +113,7 @@ button {
 /* Main Header Search Box (Desktop) */
 .header-search {
     position: relative;
-    display: flex; /* Display by default for desktop */
+    display: flex;
     align-items: center;
     flex-grow: 1; /* Allows it to take available space */
     max-width: 320px; /* Constrain search bar width */
@@ -145,7 +147,6 @@ button {
     pointer-events: none;
 }
 
-
 /* Hamburger menu for mobile */
 .menu-toggle {
     display: none; /* Hidden by default on desktop */
@@ -169,24 +170,28 @@ button {
 /* --- Main Layout --- */
 .main-layout {
     display: flex;
-    width: 100%; /* Take full width */
-    flex: 1; /* Allows it to grow and fill available space */
-    /* Remove padding from main-layout here */
-    padding: 0; 
+    width: 100%;
+    flex: 1;
+    /* Push main-layout down to clear the sticky header */
+    margin-top: var(--header-height);
+    /* Set height to fill remaining viewport, allowing internal scrolling */
+    height: calc(100vh - var(--header-height));
+    overflow: hidden; /* Prevent this container from scrolling, let children handle it */
 }
 
 /* --- Sidebar (Desktop) --- */
 .sidebar {
     width: 300px;
     flex-shrink: 0;
-    /* Adjust padding to remove the 1.5rem right padding for border and move it to main-content */
-    padding: 0 0 1.5rem 2rem; /* Top, Right(0), Bottom, Left */
+    /* Padding for the overall sidebar content area */
+    padding: 0 0 1.5rem 2rem;
     border-right: 1px solid var(--color-border-light);
     background-color: var(--color-bg-primary);
+    /* Make sidebar sticky within the main-layout's internal scroll area */
     position: sticky;
-    top: 0; /* Sticky to top of viewport (below header) */
-    height: 100vh; /* Make it full height of viewport */
-    overflow-y: auto; /* Allow scrolling within the sidebar */
+    top: 0; /* Sticky to the top of its scrolling parent */
+    height: 100%; /* Take full height of its parent container */
+    overflow-y: auto; /* Allow sidebar content to scroll independently */
     z-index: 999;
 
     /* For mobile menu drawer. Hidden by default on desktop. */
@@ -195,17 +200,21 @@ button {
     transition: none;
 }
 
-/* Specific padding for sidebar content */
+/* Sidebar Header (Home link and GitHub Pages category) */
+.sidebar-header {
+    padding-top: 1.5rem; /* Space from top of sidebar (under header visual) */
+    padding-right: 1.5rem; /* Internal padding for elements */
+    padding-bottom: 0.5rem;
+}
+
+/* No dedicated sidebar-search in HTML anymore */
+/* No .sidebar-version needed, it's in the main header */
+
+/* Sidebar Navigation (Collapsible Sections & Links) */
 .sidebar-nav {
-    padding-top: 2rem; /* Space from the top of the scrollable sidebar */
     padding-right: 1.5rem; /* Internal padding for nav items */
 }
 
-/* No sidebar-header or sidebar-search in HTML anymore */
-/* Remove their specific CSS rules if they exist from previous versions to avoid conflicts */
-
-
-/* Sidebar Navigation (Collapsible Sections & Links) */
 .sidebar-nav ul {
     margin-bottom: 1rem;
 }
@@ -214,7 +223,7 @@ button {
     margin-bottom: 0;
 }
 
-/* Category Titles (e.g., GitHub Pages, Quickstart) */
+/* Category Titles (e.g., Quickstart, Set up site with Jekyll) */
 .sidebar-category-title {
     font-size: 0.8rem;
     font-weight: 600;
@@ -226,10 +235,10 @@ button {
     padding: 0 0.5rem;
 }
 
-/* Divider below category title */
+/* Divider below sidebar-header */
 .sidebar-divider {
     border-top: 1px solid var(--color-border-light);
-    margin: 0.5rem 0;
+    margin: 0.5rem 0; /* Adjust spacing around the divider */
 }
 
 /* Individual Sidebar Links (e.g., Home, or inside subsections) */
@@ -331,11 +340,12 @@ button {
 .main-content {
     flex-grow: 1;
     min-width: 0;
-    padding: 2rem; /* Consistent padding around content */
+    padding: 2rem;
     background-color: var(--color-bg-primary);
-    /* Internal max-width and centering for readability within the content column */
     max-width: 900px;
     margin: 0 auto;
+    /* Ensure content area is scrollable if its content exceeds viewport height */
+    overflow-y: auto;
 }
 
 .main-content h1 {
@@ -445,18 +455,20 @@ button {
     .main-layout {
         flex-direction: column;
         padding: 0;
-        margin-top: 0; /* Remove top margin on mobile */
-        gap: 0;
+        margin-top: var(--header-height); /* Keep pushed down by header */
+        /* Re-evaluate height for mobile, often full height if header is fixed */
+        height: calc(100vh - var(--header-height));
+        overflow: hidden; /* Keep hidden, let sidebar/content scroll */
     }
 
     /* Sidebar as a mobile drawer */
     .sidebar {
         position: fixed;
-        top: 0;
+        top: 0; /* Starts from top of viewport */
         left: 0;
         width: 80%;
         max-width: 320px;
-        height: 100vh;
+        height: 100vh; /* Full viewport height */
         overflow-y: auto;
         background-color: var(--color-bg-primary);
         border-right: 1px solid var(--color-border-light);
@@ -464,7 +476,7 @@ button {
         z-index: 1002;
         transform: translateX(-100%);
         transition: transform 0.3s ease-in-out;
-        /* Re-add padding for the mobile drawer content */
+        /* Overall padding for the mobile drawer content */
         padding: 1rem 1.5rem 1.5rem 1.5rem;
     }
 
@@ -487,10 +499,14 @@ button {
         display: block;
     }
 
-    /* Sidebar nav padding adjustment for mobile drawer */
+    /* Sidebar header/nav padding adjustment for mobile drawer */
+    .sidebar-header {
+        padding-top: 0; /* No extra padding for mobile drawer header */
+        padding-right: 0; /* Adjusted for overall sidebar padding */
+        padding-bottom: 0.5rem;
+    }
     .sidebar-nav {
-        padding-top: 0; /* No extra padding for mobile drawer */
-        padding-right: 0; /* No extra padding for mobile drawer */
+        padding-right: 0; /* Adjusted for overall sidebar padding */
     }
     
     /* Main content on mobile - no fixed sidebar, full width */
@@ -498,6 +514,8 @@ button {
         max-width: 100%;
         padding: 1rem 1rem 2rem 1rem; /* Adjust padding for mobile */
         margin: 0;
+        height: 100%; /* Take full height of its parent (main-layout) */
+        overflow-y: auto; /* Allow main content to scroll independently */
     }
 
     body.no-scroll {
@@ -508,15 +526,15 @@ button {
 /* Adjustments for very small screens (if needed) */
 @media (max-width: 768px) {
     .header-inner {
-        flex-wrap: wrap; /* Allow header items to wrap */
+        flex-wrap: wrap;
         justify-content: flex-start;
         gap: 0.5rem;
     }
     .site-logo {
-        flex-grow: 1; /* Allow logo to take more space if other items are hidden */
+        flex-grow: 1;
         text-align: left;
     }
     .menu-toggle {
-        margin-right: 0.5rem; /* Space between toggle and logo */
+        margin-right: 0.5rem;
     }
 }
