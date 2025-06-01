@@ -1,0 +1,303 @@
+/* style.css */
+
+/* 1. Basic Reset/Normalize (Optional but recommended) */
+/* You might use a real CSS reset like Normalize.css or a simplified one */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+body, h1, h2, h3, p, ul, ol, li {
+    margin: 0;
+    padding: 0;
+}
+ul, ol {
+    list-style: none;
+}
+a {
+    text-decoration: none;
+    color: inherit; /* Inherit color by default */
+}
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* 2. Global Styles */
+body {
+    font-family: 'Inter', sans-serif; /* Use the font linked in HTML */
+    line-height: 1.6;
+    color: #24292f; /* Dark text for light mode */
+    background-color: #ffffff; /* White background for light mode */
+    display: flex;
+    flex-direction: column; /* Stack header, main-wrapper, footer vertically */
+    min-height: 100vh; /* Ensure body takes full viewport height */
+}
+
+/* 3. Header Styling */
+.site-header {
+    background-color: #f6f8fa; /* Light grey background */
+    border-bottom: 1px solid #e1e4e8;
+    padding: 1rem 2rem;
+    position: sticky; /* Makes it stick to the top */
+    top: 0;
+    z-index: 1000; /* Ensure it stays on top */
+}
+
+.header-content {
+    max-width: 1200px; /* Limit content width */
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.site-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0366d6; /* GitHub blue */
+    padding-right: 20px;
+}
+
+.top-nav ul {
+    display: flex;
+    gap: 20px;
+}
+
+.top-nav a {
+    color: #586069;
+    font-weight: 500;
+    padding: 5px 0;
+    transition: color 0.2s ease-in-out;
+}
+.top-nav a:hover {
+    color: #0366d6;
+}
+
+.search-bar input {
+    border: 1px solid #d1d5da;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.9em;
+    width: 200px;
+}
+
+/* 4. Main Wrapper (Layout with Sidebar and Main Content) */
+.main-wrapper {
+    display: flex;
+    flex: 1; /* Allow main content to grow and fill available space */
+    max-width: 1200px; /* Match header content width */
+    margin: 0 auto;
+    padding: 20px 0; /* Vertical padding */
+}
+
+/* 5. Sidebar Styling */
+.sidebar {
+    width: 250px; /* Fixed width for sidebar */
+    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    padding: 0 20px 20px 0; /* Right padding to separate from main content */
+    border-right: 1px solid #e1e4e8;
+    position: sticky; /* Make sidebar stick */
+    top: calc(1rem + 65px); /* Stick below header (header padding + header height) */
+    height: calc(100vh - (1rem + 65px + 20px)); /* Adjust height for scrolling */
+    overflow-y: auto; /* Enable scrolling for long sidebars */
+}
+
+.sidebar-nav ul ul { /* Nested lists for sub-sections */
+    padding-left: 15px;
+    margin-top: 5px;
+}
+
+.sidebar-nav li {
+    margin-bottom: 5px;
+}
+
+.sidebar-nav a {
+    display: block; /* Make entire area clickable */
+    padding: 5px 10px;
+    color: #586069;
+    font-size: 0.95em;
+    border-radius: 5px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+.sidebar-nav a:hover {
+    background-color: #f0f0f0;
+    color: #24292f;
+}
+.sidebar-nav a.active { /* For active page/section */
+    background-color: #e6f7ff; /* Light blue */
+    color: #0366d6;
+    font-weight: 500;
+}
+
+/* 6. Main Content Area Styling */
+.main-content {
+    flex-grow: 1; /* Allow main content to take up remaining space */
+    padding: 0 20px; /* Horizontal padding for content */
+    min-width: 0; /* Allow content to shrink within flex container */
+    position: relative; /* For "Edit this page" absolute positioning */
+}
+
+.doc-article h1, .doc-article h2, .doc-article h3, .doc-article h4 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    line-height: 1.25;
+    border-bottom: 1px solid #eaecef; /* Horizontal line for headers */
+    padding-bottom: 0.3em;
+}
+.doc-article h1 { font-size: 2.2em; }
+.doc-article h2 { font-size: 1.8em; }
+.doc-article h3 { font-size: 1.4em; }
+
+.doc-article p {
+    margin-bottom: 1em;
+}
+
+.doc-article pre { /* Code blocks */
+    background-color: #f6f8fa;
+    border-radius: 6px;
+    padding: 1em;
+    overflow-x: auto;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-size: 0.9em;
+    margin-bottom: 1em;
+}
+
+.doc-article code { /* Inline code */
+    background-color: rgba(27,31,35,.05);
+    border-radius: 6px;
+    padding: 0.2em 0.4em;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-size: 0.9em;
+}
+
+/* "Edit this page" Link Styling (as you added before, refined) */
+.edit-page-link {
+    display: block;
+    text-align: right;
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    font-family: sans-serif;
+    font-size: 0.85em;
+    color: #586069;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+.edit-page-link:hover {
+    background-color: #e6e6e6;
+    color: #24292f;
+}
+
+/* 7. Page Table of Contents (Right Sidebar) */
+.page-toc {
+    width: 200px; /* Fixed width for right TOC */
+    flex-shrink: 0;
+    padding: 0 0 20px 20px; /* Left padding */
+    border-left: 1px solid #e1e4e8;
+    position: sticky;
+    top: calc(1rem + 65px); /* Stick below header */
+    height: calc(100vh - (1rem + 65px + 20px));
+    overflow-y: auto;
+}
+
+.page-toc h4 {
+    font-size: 1em;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #586069;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.page-toc ul li {
+    margin-bottom: 5px;
+}
+
+.page-toc a {
+    display: block;
+    padding: 3px 0;
+    font-size: 0.85em;
+    color: #586069;
+}
+.page-toc a:hover {
+    color: #0366d6;
+}
+.page-toc a.active { /* For active heading */
+    font-weight: 500;
+    color: #0366d6;
+}
+
+/* 8. Footer Styling */
+.site-footer {
+    background-color: #f6f8fa;
+    border-top: 1px solid #e1e4e8;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    color: #586069;
+    font-size: 0.85em;
+    margin-top: auto; /* Push footer to the bottom */
+}
+
+/* 9. Responsive Design (Mobile First) */
+/* Adjust layout for smaller screens */
+@media (max-width: 992px) {
+    .main-wrapper {
+        flex-direction: column; /* Stack sidebar and main content vertically */
+        padding: 10px;
+    }
+
+    .sidebar {
+        width: 100%; /* Sidebar takes full width */
+        border-right: none;
+        border-bottom: 1px solid #e1e4e8; /* Add bottom border */
+        padding: 0 0 10px 0; /* Adjust padding */
+        position: static; /* No longer sticky */
+        height: auto; /* No longer fixed height */
+        overflow-y: visible; /* No special scrolling */
+    }
+
+    .sidebar-nav ul {
+        display: flex; /* Make top-level sidebar items horizontal */
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+    .sidebar-nav ul li {
+        margin-bottom: 0;
+    }
+    .sidebar-nav ul ul { /* Nested lists become normal blocks */
+        padding-left: 0;
+        margin-top: 10px;
+        flex-direction: column;
+    }
+
+    .main-content {
+        padding: 20px 0; /* Adjust padding */
+    }
+
+    .page-toc {
+        display: none; /* Hide page-specific TOC on smaller screens */
+    }
+
+    .header-content {
+        flex-wrap: wrap; /* Allow header items to wrap */
+        justify-content: center;
+        gap: 10px;
+    }
+    .site-logo, .top-nav, .search-bar {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .site-logo { padding-right: 0; }
+    .top-nav ul { justify-content: center; }
+    .search-bar input { width: 80%; }
+}
+
+@media (max-width: 768px) {
+    .site-header, .site-footer {
+        padding: 1rem;
+    }
+}
