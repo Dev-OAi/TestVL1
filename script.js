@@ -1,4 +1,4 @@
-// script.js
+// script.js (No changes from previous version)
 
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.querySelector('.menu-toggle');
@@ -17,7 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Focus the first link in the sidebar when opened
         if (isMenuOpen) {
-            sidebar.querySelector('a').focus();
+            // Find the first focusable element (link or input) in the sidebar
+            const firstFocusable = sidebar.querySelector('a, button, input');
+            if (firstFocusable) {
+                firstFocusable.focus();
+            }
         } else {
             menuToggle.focus(); // Return focus to the toggle button when closed
         }
