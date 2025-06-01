@@ -637,8 +637,10 @@ html {
 
 @media (max-width: 768px) {
     .header-inner {
+        display: flex;
+        align-items: center; /* Vertically center items */
+        justify-content: flex-start; /* Align items to the left */
         
-        justify-content: flex-start;
         gap: 0.5rem;
         flex-direction: column; /* Stack vertically on smaller screens */
     }
