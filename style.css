@@ -16,6 +16,9 @@
     --color-active-link-bg: #3a3a3a; /* Background for active sidebar link */
     --color-active-link-text: #ffffff; /* Text color for active link */
     --color-active-link-arrow: #58a6ff; /* Color for the active link arrow */
+    --color-toc-active-blue: #58a6ff; /* Blue color for active TOC link */
+    --color-toc-active-bg: rgba(88, 166, 255, 0.1); /* Light blue background for active TOC */
+
 
     /* Header height variable for layout calculation - Made thinner */
     --header-height: 52px; /* Reduced from 60px to make it thinner */
@@ -66,9 +69,8 @@ html {
 .site-header {
     background-color: var(--color-bg-primary);
     border-bottom: 1px solid var(--color-border-light);
-    /* Align header content to the left edge of the sidebar's content */
-    padding: 0 1.5rem 0 2rem; /* Top/Bottom 0, Right 1.5rem, Left 2rem */
-    height: var(--header-height); /* Fixed height, now thinner */
+    padding: 0 1.5rem 0 2rem;
+    height: var(--header-height);
     display: flex;
     align-items: center;
     position: sticky;
@@ -77,11 +79,10 @@ html {
 }
 
 .header-inner {
-    width: 100%; /* Take full width of parent (site-header) */
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 1rem; /* Reduced gap for a tighter look */
-    /* Removed max-width and margin: 0 auto; for left alignment */
+    gap: 1rem;
 }
 
 .site-logo {
@@ -115,14 +116,14 @@ html {
     position: relative;
     display: flex;
     align-items: center;
-    flex-grow: 1; /* Allows it to take available space */
+    flex-grow: 1;
     max-width: 320px;
-    margin-left: auto; /* Pushes it to the right */
+    margin-left: auto;
 }
 .header-search input {
     width: 100%;
     padding: 0.6rem 1rem;
-    padding-right: 2.2rem; /* Added padding to the right for the icon */
+    padding-right: 2.2rem;
     border: 1px solid var(--color-input-border);
     border-radius: 6px;
     background-color: var(--color-input-bg);
@@ -140,7 +141,7 @@ html {
 }
 .header-search .search-button {
     position: absolute;
-    right: 0.75rem; /* Moved to the right */
+    right: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
     color: var(--color-text-secondary);
@@ -149,7 +150,7 @@ html {
 
 /* Hamburger menu for mobile */
 .menu-toggle {
-    display: none; /* Hidden by default on desktop */
+    display: none;
     background-color: transparent;
     border: 1px solid transparent;
     padding: 0.5rem;
@@ -167,14 +168,14 @@ html {
     border-color: var(--color-border-light);
 }
 
-/* --- Main Layout --- */
+/* --- Main Layout (Updated for 3 columns) --- */
 .main-layout {
     display: flex;
     width: 100%;
     flex: 1;
-    margin-top: var(--header-height); /* Push main-layout down to clear the sticky header */
+    margin-top: var(--header-height);
     height: calc(100vh - var(--header-height));
-    overflow: hidden; /* Prevent this container from scrolling, let children handle it */
+    overflow: hidden;
 }
 
 /* --- Sidebar (Desktop) --- */
@@ -189,8 +190,6 @@ html {
     height: 100%;
     overflow-y: auto;
     z-index: 999;
-
-    /* For mobile menu drawer. Hidden by default on desktop. */
     display: block;
     transform: translateX(0);
     transition: none;
@@ -287,14 +286,13 @@ html {
     cursor: pointer;
     font-size: 0.95rem;
     transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
-    list-style: none; /* Hide default triangle/arrow */
+    list-style: none;
     border-radius: 6px;
 }
-/* Hide default summary marker across browsers */
 .sidebar-section-title::-webkit-details-marker {
     display: none;
 }
-.sidebar-section-title::marker { /* For Firefox */
+.sidebar-section-title::marker {
     display: none;
 }
 
@@ -332,14 +330,14 @@ html {
 /* --- Main Content --- */
 .main-content {
     flex-grow: 1;
-    min-width: 0;
+    min-width: 0; /* Allows content to shrink */
     /* Adjust padding to shift content slightly left and control right margin */
     padding: 2rem 3rem 2rem 2rem; /* Top 2rem, Right 3rem (more space), Bottom 2rem, Left 2rem */
     background-color: var(--color-bg-primary);
     max-width: 950px; /* Increased max-width slightly to reduce perceived 'wasted space' */
     margin-right: auto; /* Push content to the left within its available space */
     margin-left: 0; /* Ensure no auto left margin */
-    overflow-y: auto;
+    overflow-y: auto; /* Allow main content to scroll independently */
 }
 
 .main-content h1 {
@@ -347,13 +345,6 @@ html {
     font-weight: 600;
     margin-bottom: 1.5rem;
     line-height: 1.2;
-    color: var(--color-text-primary);
-}
-
-.main-content p {
-    font-size: 1rem;
-    line-height: 1.75;
-    margin-bottom: 1rem;
     color: var(--color-text-primary);
 }
 
@@ -372,6 +363,13 @@ html {
     font-weight: 600;
     margin-top: 1.75rem;
     margin-bottom: 0.75rem;
+    color: var(--color-text-primary);
+}
+
+.main-content p {
+    font-size: 1rem;
+    line-height: 1.75;
+    margin-bottom: 1rem;
     color: var(--color-text-primary);
 }
 
@@ -416,6 +414,108 @@ html {
     color: var(--color-text-primary);
 }
 
+/* --- Table of Contents (TOC) --- */
+.toc-container {
+    width: 250px; /* Adjust width as needed */
+    flex-shrink: 0;
+    padding: 2rem 2rem 1.5rem 1.5rem; /* Padding for the TOC area */
+    background-color: var(--color-bg-primary);
+    position: sticky;
+    top: var(--header-height); /* Sticks below the header */
+    height: calc(100vh - var(--header-height)); /* Fill remaining height */
+    overflow-y: auto; /* Allow TOC to scroll independently */
+    z-index: 900;
+    border-left: 1px solid var(--color-border-light); /* Divider on the left of TOC */
+}
+
+.toc-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem; /* Align with TOC links */
+}
+
+.toc-nav ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.toc-nav li {
+    margin-bottom: 0.25rem;
+}
+
+.toc-nav a {
+    display: block;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+    border-radius: 4px; /* Slight rounding */
+    position: relative;
+    border-left: 2px solid transparent; /* For active state highlight line */
+}
+
+.toc-nav a:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-tertiary);
+}
+
+.toc-nav a.active {
+    color: var(--color-toc-active-blue); /* Blue text for active link */
+    background-color: var(--color-toc-active-bg); /* Light blue background */
+    font-weight: 500;
+    border-left-color: var(--color-toc-active-blue); /* Blue line on the left */
+}
+
+.toc-nav a.active:hover {
+    color: var(--color-toc-active-blue); /* Keep blue on hover */
+    background-color: var(--color-toc-active-bg); /* Keep light blue background */
+}
+
+/* Nested TOC items (e.g., h3 under h2) */
+.toc-nav ul ul {
+    padding-left: 1rem; /* Indent nested lists */
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+/* TOC Meta links (Edit this page, Scroll to top) */
+.toc-meta {
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border-light);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.toc-meta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    transition: color 0.15s ease-in-out;
+    padding: 0.25rem 0.5rem; /* Small padding for clickable area */
+}
+
+.toc-meta-link:hover {
+    color: var(--color-text-primary);
+}
+
+.toc-meta-link.scroll-to-top svg {
+    stroke: var(--color-text-secondary);
+    transition: stroke 0.15s ease-in-out;
+}
+
+.toc-meta-link.scroll-to-top:hover svg {
+    stroke: var(--color-text-primary);
+}
+
+
 /* --- Footer --- */
 .site-footer {
     background-color: var(--color-bg-secondary);
@@ -428,13 +528,24 @@ html {
 }
 
 /* --- Mobile Menu Drawer & Responsiveness --- */
+@media (max-width: 1200px) { /* Adjust breakpoint for TOC hiding if necessary */
+    .toc-container {
+        display: none; /* Hide TOC on smaller screens */
+    }
+    .main-content {
+        max-width: 100%; /* Allow main content to take full width */
+        margin-right: auto; /* Keep left alignment */
+        margin-left: auto; /* Center content on smaller screens if no TOC */
+        padding: 2rem; /* Revert to simpler padding */
+    }
+}
+
 @media (max-width: 992px) {
     .header-inner {
         justify-content: space-between;
         gap: 0.5rem;
     }
 
-    /* Hide header-search and version on mobile */
     .header-search,
     .header-version-selector {
         display: none;
@@ -445,7 +556,6 @@ html {
         order: -1;
     }
 
-    /* Adjust main layout for mobile */
     .main-layout {
         flex-direction: column;
         padding: 0;
@@ -454,7 +564,6 @@ html {
         overflow: hidden;
     }
 
-    /* Sidebar as a mobile drawer */
     .sidebar {
         position: fixed;
         top: 0;
@@ -491,7 +600,6 @@ html {
         display: block;
     }
 
-    /* Sidebar header/nav padding adjustment for mobile drawer */
     .sidebar-header {
         padding-top: 0;
         padding-right: 0;
@@ -501,7 +609,6 @@ html {
         padding-right: 0;
     }
     
-    /* Main content on mobile - no fixed sidebar, full width */
     .main-content {
         max-width: 100%;
         padding: 1rem 1rem 2rem 1rem;
@@ -515,7 +622,6 @@ html {
     }
 }
 
-/* Adjustments for very small screens (if needed) */
 @media (max-width: 768px) {
     .header-inner {
         flex-wrap: wrap;
