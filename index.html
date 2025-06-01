@@ -94,21 +94,18 @@
 
                 <nav class="sidebar-nav">
                     <ul>
-                        <li><a href="#" class="sidebar-link active">Home</a></li>
-                        
-                        <li class="sidebar-section">
-                            <details open> <summary class="sidebar-section-title">GitHub Pages</summary>
-                                <ul class="sidebar-subsection-list">
-                                    <li><a href="#" class="sidebar-link">Quickstart</a></li>
-                                    <li><a href="#" class="sidebar-link">Get started</a></li>
-                                </ul>
-                            </details>
-                        </li>
+                        <li><a href="#" class="sidebar-link active">
+                            <span class="active-arrow"></span> Home
+                        </a></li>
+                    </ul>
 
+                    <h4 class="sidebar-category-title">GitHub Pages</h4>
+                    <div class="sidebar-divider"></div> <h4 class="sidebar-category-title">Quickstart</h4>
+                    <ul>
                         <li class="sidebar-section">
-                            <details open>
-                                <summary class="sidebar-section-title">What is GitHub Pages?</summary>
+                            <details open> <summary class="sidebar-section-title">Get started</summary>
                                 <ul class="sidebar-subsection-list">
+                                    <li><a href="#" class="sidebar-link">What is GitHub Pages?</a></li>
                                     <li><a href="#" class="sidebar-link">Create a GitHub Pages site</a></li>
                                     <li><a href="#" class="sidebar-link">GitHub Pages limits</a></li>
                                     <li><a href="#" class="sidebar-link">Use custom workflows</a></li>
@@ -123,10 +120,13 @@
                                 </ul>
                             </details>
                         </li>
-                        
+                    </ul>
+                    
+                    <h4 class="sidebar-category-title">GitHub Pages & Jekyll</h4>
+                    <ul>
                         <li class="sidebar-section">
                             <details open>
-                                <summary class="sidebar-section-title">GitHub Pages & Jekyll</summary>
+                                <summary class="sidebar-section-title">Set up site with Jekyll</summary>
                                 <ul class="sidebar-subsection-list">
                                     <li><a href="#" class="sidebar-link">Create site with Jekyll</a></li>
                                     <li><a href="#" class="sidebar-link">Test site locally with Jekyll</a></li>
@@ -135,19 +135,38 @@
                                     <li><a href="#" class="sidebar-link">Add theme to Pages site</a></li>
                                     <li><a href="#" class="sidebar-link">Jekyll build errors for Pages</a></li>
                                     <li><a href="#" class="sidebar-link">Troubleshoot Jekyll errors</a></li>
-                                    <li><a href="#" class="sidebar-link">Configure a custom domain</a></li>
                                 </ul>
                             </details>
                         </li>
-                        
-                        </ul>
-                </nav>
+                        <li class="sidebar-section">
+                            <details open>
+                                <summary class="sidebar-section-title">Configure a custom domain</summary>
+                                <ul class="sidebar-subsection-list">
+                                    <li><a href="#" class="sidebar-link">About custom domains</a></li>
+                                    <li><a href="#" class="sidebar-link">Setting up a custom domain</a></li>
+                                    <li><a href="#" class="sidebar-link">Troubleshooting custom domains</a></li>
+                                </ul>
+                            </details>
+                        </li>
+                    </ul>
+                    </nav>
             </aside>
 
             <main class="main-content">
+                <h1>Welcome to My Docs!</h1>
                 <p>This is where your main documentation content will be placed.</p>
-                <p>You can add headings, paragraphs, code blocks, images, and more.</p>
-                <p>This template provides the structural foundation and a basic visual theme.</p>
+                <p>You can add headings, paragraphs, code blocks, images, and more. The layout on the left now reflects the GitHub Docs style, with a structured sidebar including categories, collapsible sections, and an active link indicator.</p>
+                
+                <h2>Getting Started</h2>
+                <p>Explore the sidebar to navigate through different sections of the documentation. Each section can be expanded or collapsed to reveal its contents.</p>
+
+                <h3>Code Example</h3>
+                <pre><code>function greet(name) {
+    console.log(`Hello, ${name}!`);
+}
+
+greet('World');
+</code></pre>
                 
                 <a href="YOUR_GITHUB_EDIT_URL_HERE" class="edit-page-link" target="_blank">
                     Edit this page on GitHub
