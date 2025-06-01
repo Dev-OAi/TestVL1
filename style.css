@@ -553,11 +553,11 @@ html {
 
     .header-search,
     .header-version-selector {
-        display: none;
+        /* display: none; */
     }
 
     .menu-toggle {
-        display: block;
+        display: flex;
         order: -1;
     }
 
