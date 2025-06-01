@@ -133,7 +133,15 @@ body {
     flex-grow: 1; /* Allow main content to take up remaining space */
     padding: 0 20px; /* Horizontal padding for content */
     min-width: 0; /* Allow content to shrink within flex container */
-    position: relative; /* For "Edit this page" absolute positioning */
+    max-width: none; /* Remove any max-width constraints */
+    /* position: relative; For "Edit this page" absolute positioning */
+}
+
+/* TOC styling */
+.toc-container {
+    width: 200px; /* Fixed width for TOC */
+    flex-shrink: 0; /* Prevent TOC from shrinking */
+   /*  background-color: #f5f5f5; Optional: for visibility */
 }
 
 .doc-article h1, .doc-article h2, .doc-article h3, .doc-article h4 {
@@ -300,4 +308,18 @@ body {
     .site-header, .site-footer {
         padding: 1rem;
     }
+
+.main-layout {
+        flex-direction: column; /* Stack vertically on smaller screens */
+    }
+
+    .sidebar, .toc-container {
+        width: 100%; /* Full width on smaller screens */
+    }
+
+    .main-content {
+        width: 100%; /* Full width on smaller screens */
+    }
+
+    
 }
