@@ -155,7 +155,7 @@ html {
 
 /* Hamburger menu for mobile */
 .menu-toggle {
-    display: inline-block;
+    display: block;
     background-color: transparent;
     border: 1px solid transparent;
     padding: 0.5rem;
