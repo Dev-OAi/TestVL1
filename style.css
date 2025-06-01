@@ -654,19 +654,19 @@ html {
     .header-search,
     .header-version-selector {
        /*  display: none; */
-        display:  flex-start;
-    align-items:  left;
+        display:block;
+    align-items:  flex-start;
     text-align:  left;
     flex-grow: 1;
-   flex-shrink: 1;
+    flex-shrink: 1;
     }
     
     .site-logo {
        /*  flex-grow: 1;  */
-         display:  none;
+         
         text-align: left;
         order: 0; /* Keep logo on the left */
-        /* position: static;  Remove absolute positioning on small screens */
+        position: static;  /* Remove absolute positioning on small screens */
     }
     .menu-toggle {
        margin-right: 1px; /* Add some spacing between the hamburger and logo */
