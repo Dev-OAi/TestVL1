@@ -173,9 +173,10 @@ html {
     display: flex;
     width: 100%;
     flex: 1;
-    margin-top: var(--header-height);
+    /* This container holds sidebar, main-content, and toc-container */
+    /* It takes up the remaining viewport height below the sticky header */
     height: calc(100vh - var(--header-height));
-    overflow: hidden;
+    overflow: hidden; /* Important: Prevents main-layout itself from scrolling */
 }
 
 /* --- Sidebar (Desktop) --- */
@@ -186,9 +187,9 @@ html {
     border-right: 1px solid var(--color-border-light);
     background-color: var(--color-bg-primary);
     position: sticky;
-    top: 0;
-    height: 100%;
-    overflow-y: auto;
+    top: var(--header-height); /* Now sticks below the header */
+    height: 100%; /* Fills parent height */
+    overflow-y: auto; /* Allows internal scrolling for the sidebar content */
     z-index: 999;
     display: block;
     transform: translateX(0);
@@ -330,14 +331,13 @@ html {
 /* --- Main Content --- */
 .main-content {
     flex-grow: 1;
-    min-width: 0; /* Allows content to shrink */
-    /* Adjust padding to shift content slightly left and control right margin */
-    padding: 2rem 3rem 2rem 2rem; /* Top 2rem, Right 3rem (more space), Bottom 2rem, Left 2rem */
+    min-width: 0;
+    padding: 2rem 3rem 2rem 2rem;
     background-color: var(--color-bg-primary);
-    max-width: 950px; /* Increased max-width slightly to reduce perceived 'wasted space' */
-    margin-right: auto; /* Push content to the left within its available space */
-    margin-left: 0; /* Ensure no auto left margin */
-    overflow-y: auto; /* Allow main content to scroll independently */
+    max-width: 950px;
+    margin-right: auto;
+    margin-left: 0;
+    overflow-y: auto; /* Allows internal scrolling for the main content area */
 }
 
 .main-content h1 {
@@ -416,16 +416,16 @@ html {
 
 /* --- Table of Contents (TOC) --- */
 .toc-container {
-    width: 250px; /* Adjust width as needed */
+    width: 250px;
     flex-shrink: 0;
-    padding: 2rem 2rem 1.5rem 1.5rem; /* Padding for the TOC area */
+    padding: 2rem 2rem 1.5rem 1.5rem;
     background-color: var(--color-bg-primary);
-    position: sticky;
-    top: var(--header-height); /* Sticks below the header */
-    height: calc(100vh - var(--header-height)); /* Fill remaining height */
-    overflow-y: auto; /* Allow TOC to scroll independently */
+    position: sticky; /* Make it sticky */
+    top: var(--header-height); /* Stick below the header */
+    height: calc(100vh - var(--header-height)); /* Fill remaining viewport height */
+    overflow-y: auto; /* Allows internal scrolling for the TOC content */
     z-index: 900;
-    border-left: 1px solid var(--color-border-light); /* Divider on the left of TOC */
+    border-left: 1px solid var(--color-border-light); /* Single vertical divider */
 }
 
 .toc-title {
@@ -434,7 +434,10 @@ html {
     color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-bottom: 0.75rem;
+    /* Styling to match reference: padding bottom and border */
+    padding-bottom: 0.75rem; /* Space before the divider */
+    border-bottom: 1px solid var(--color-border-light); /* The single horizontal divider */
+    margin-bottom: 1.25rem; /* Space after the divider and before TOC links */
     padding-left: 0.5rem; /* Align with TOC links */
 }
 
@@ -454,9 +457,9 @@ html {
     font-size: 0.9rem;
     color: var(--color-text-secondary);
     transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
-    border-radius: 4px; /* Slight rounding */
+    border-radius: 4px;
     position: relative;
-    border-left: 2px solid transparent; /* For active state highlight line */
+    border-left: 2px solid transparent;
 }
 
 .toc-nav a:hover {
@@ -465,31 +468,32 @@ html {
 }
 
 .toc-nav a.active {
-    color: var(--color-toc-active-blue); /* Blue text for active link */
-    background-color: var(--color-toc-active-bg); /* Light blue background */
+    color: var(--color-toc-active-blue);
+    background-color: var(--color-toc-active-bg);
     font-weight: 500;
-    border-left-color: var(--color-toc-active-blue); /* Blue line on the left */
+    border-left-color: var(--color-toc-active-blue);
 }
 
 .toc-nav a.active:hover {
-    color: var(--color-toc-active-blue); /* Keep blue on hover */
-    background-color: var(--color-toc-active-bg); /* Keep light blue background */
+    color: var(--color-toc-active-blue);
+    background-color: var(--color-toc-active-bg);
 }
 
 /* Nested TOC items (e.g., h3 under h2) */
 .toc-nav ul ul {
-    padding-left: 1rem; /* Indent nested lists */
+    padding-left: 1rem;
     margin-top: 0.25rem;
     margin-bottom: 0.5rem;
 }
 
 /* TOC Meta links (Edit this page, Scroll to top) */
 .toc-meta {
-    padding-top: 1rem;
-    border-top: 1px solid var(--color-border-light);
+    /* No border-top here; the toc-title handles the divider */
+    padding-top: 1rem; /* Space above these links */
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    padding-left: 0.5rem; /* Align with TOC links */
 }
 
 .toc-meta-link {
@@ -499,7 +503,7 @@ html {
     font-size: 0.85rem;
     color: var(--color-text-secondary);
     transition: color 0.15s ease-in-out;
-    padding: 0.25rem 0.5rem; /* Small padding for clickable area */
+    padding: 0.25rem 0; /* Adjusted padding, removed horizontal as parent handles left-alignment */
 }
 
 .toc-meta-link:hover {
@@ -528,15 +532,15 @@ html {
 }
 
 /* --- Mobile Menu Drawer & Responsiveness --- */
-@media (max-width: 1200px) { /* Adjust breakpoint for TOC hiding if necessary */
+@media (max-width: 1200px) {
     .toc-container {
-        display: none; /* Hide TOC on smaller screens */
+        display: none;
     }
     .main-content {
-        max-width: 100%; /* Allow main content to take full width */
-        margin-right: auto; /* Keep left alignment */
-        margin-left: auto; /* Center content on smaller screens if no TOC */
-        padding: 2rem; /* Revert to simpler padding */
+        max-width: 100%;
+        margin-right: auto;
+        margin-left: auto;
+        padding: 2rem;
     }
 }
 
@@ -566,11 +570,11 @@ html {
 
     .sidebar {
         position: fixed;
-        top: 0;
+        top: 0; /* Sticks to top of viewport when mobile menu slides in */
         left: 0;
         width: 80%;
         max-width: 320px;
-        height: 100vh;
+        height: 100vh; /* Fills full viewport height */
         overflow-y: auto;
         background-color: var(--color-bg-primary);
         border-right: 1px solid var(--color-border-light);
