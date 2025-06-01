@@ -6,6 +6,26 @@
     <title>AccountFinder Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+
+         /* Optional: Add some basic styling for the link */
+        .edit-page-link {
+            display: block; /* Makes it take up full width for easier clicking */
+            text-align: right; /* Aligns to the right */
+            padding: 10px;
+            background-color: #f0f0f0; /* Light grey background */
+            border-bottom: 1px solid #ccc;
+            font-family: sans-serif;
+            font-size: 0.9em;
+            text-decoration: none;
+            color: #333;
+            margin-bottom: 20px; /* Space below the link */
+        }
+        .edit-page-link:hover {
+            background-color: #e0e0e0; /* Darker on hover */
+        }
+
+
+        
         /* Custom styles for sticky table headers and smooth transitions */
         th.sticky-left, td.sticky-left {
             position: sticky;
@@ -293,6 +313,11 @@
             <span class="nav-rail-icon-placeholder"></span>
             <span class="nav-rail-item-label">Settings</span>
         </a>
+
+         <a href="YOUR_GITHUB_EDIT_URL_HERE" class="edit-page-link" target="_blank">
+        Edit this page on GitHub
+        </a>
+        
     </nav>
 
     <!-- Navigation Drawer (for compact screens) -->
