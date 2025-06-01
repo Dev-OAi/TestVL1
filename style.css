@@ -118,7 +118,7 @@ html {
 
 /* Main Header Search Box (Desktop) */
 .header-search {
-    position: static;
+   /* position: static; */
     display: flex;
     align-items: center;
     flex-grow: 1;
@@ -163,7 +163,7 @@ html {
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s;
     order: 0; /* Ensure it appears in the correct order in flex */
-    margin-right: 10px; /* Space between hamburger and logo */
+   /* margin-right: 10px;  Space between hamburger and logo */ 
 }
 .menu-toggle svg {
     stroke: var(--color-text-primary);
@@ -179,7 +179,7 @@ html {
 .main-layout {
     display: flex;
     width: 100%;
-    flex-direction: row;
+   /* flex-direction: row; */
     flex: 1;
     /* This container holds sidebar, main-content, and toc-container */
     /* It takes up the remaining viewport height below the sticky header */
@@ -637,12 +637,12 @@ html {
 
 @media (max-width: 768px) {
     .header-inner {
-        display: flex;
+       /* display: flex; */
         align-items: center; /* Vertically center items */
         justify-content: flex-start; /* Align items to the left */
         
         gap: 0.5rem;
-        flex-direction: column; /* Stack vertically on smaller screens */
+      /*   flex-direction: column; Stack vertically on smaller screens */
     }
     .site-logo {
         flex-grow: 1;
