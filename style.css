@@ -186,7 +186,7 @@ button {
 
 .sidebar-search {
     position: relative;
-    display: flex;
+    display: flex; /* Always display sidebar search on desktop */
     align-items: center;
     margin-bottom: 1.5rem;
 }
