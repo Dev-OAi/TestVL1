@@ -172,6 +172,7 @@ html {
 .main-layout {
     display: flex;
     width: 100%;
+    flex-direction: row;
     flex: 1;
     /* This container holds sidebar, main-content, and toc-container */
     /* It takes up the remaining viewport height below the sticky header */
@@ -181,7 +182,7 @@ html {
 
 /* --- Sidebar (Desktop) --- */
 .sidebar {
-    width: 300px;
+    width: 250px;
     flex-shrink: 0;
     padding: 0 0 1.5rem 2rem;
     border-right: 1px solid var(--color-border-light);
@@ -330,11 +331,12 @@ html {
 
 /* --- Main Content --- */
 .main-content {
-    flex-grow: 1;
+    flex-grow: 1; /* Grow to fill available space */
+    flex-shrink: 1; /* Allow shrinking if needed */
     min-width: 0;
     padding: 2rem 3rem 2rem 2rem;
     background-color: var(--color-bg-primary);
-    max-width: 950px;
+    max-width: none; /* Remove any max-width constraints */
     margin-right: auto;
     margin-left: 0;
     overflow-y: auto; /* Allows internal scrolling for the main content area */
@@ -416,7 +418,7 @@ html {
 
 /* --- Table of Contents (TOC) --- */
 .toc-container {
-    width: 250px;
+    width: 200px;
     flex-shrink: 0;
     padding: 2rem 2rem 1.5rem 1.5rem;
     background-color: var(--color-bg-primary);
@@ -631,6 +633,7 @@ html {
         flex-wrap: wrap;
         justify-content: flex-start;
         gap: 0.5rem;
+        flex-direction: column; /* Stack vertically on smaller screens */
     }
     .site-logo {
         flex-grow: 1;
@@ -638,5 +641,12 @@ html {
     }
     .menu-toggle {
         margin-right: 0.5rem;
+    }
+    .sidebar, .toc-container {
+        width: 100%; /* Full width on smaller screens */
+    }
+
+    .main-content {
+        width: 100%; /* Full width on smaller screens */
     }
 }
