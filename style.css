@@ -161,7 +161,7 @@ html {
 }
 
 .header-search .search-button::before {
-    content: '🔍'; /* Simple magnifying glass emoji as placeholder */
+  /*  content: '🔍';  Simple magnifying glass emoji as placeholder */
     font-size: 16px;
 }
 
