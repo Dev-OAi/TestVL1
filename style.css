@@ -1,32 +1,33 @@
 /* style.css */
 
 :root {
-    /* GitHub Docs Color Palette (approximate, refined) */
-    --color-bg-primary: #ffffff; /* White background for page and header */
-    --color-bg-secondary: #f6f8fa; /* Light grey for subtle elements like footer/code blocks */
-    --color-text-primary: #24292f; /* Main dark text */
-    --color-text-secondary: #57606a; /* Muted grey text */
-    --color-border-light: #d0d7de; /* Light border color */
-    --color-accent-blue: #0969da; /* GitHub blue for links/active states */
-    --color-accent-blue-hover: #0550ae; /* Darker blue on hover */
-    --color-input-bg: #f6f8fa; /* Search input background */
-    --color-input-border: #d0d7de; /* Search input border */
-    --color-shadow-light: rgba(140, 149, 159, 0.15); /* For subtle shadows */
-    --color-active-link-bg: #e1e4e8; /* Background for active sidebar link (similar to GitHub's light mode) */
-    --color-active-link-text: #24292f; /* Text color for active link */
-    --color-active-link-arrow: #0969da; /* Color for the active link arrow */
+    /* GitHub Docs DARK Theme Color Palette (approximate, based on image) */
+    --color-bg-primary: #121212; /* Very dark background for body, header, sidebar */
+    --color-bg-secondary: #202020; /* Slightly lighter dark for subtle elements (footer, code) */
+    --color-bg-tertiary: #2e2e2e; /* For active sidebar links, search input background */
+    --color-text-primary: #ffffff; /* Main white text */
+    --color-text-secondary: #adadad; /* Lighter grey for muted text, category titles */
+    --color-border-light: #3a3a3a; /* Dark theme borders */
+    --color-accent-blue: #58a6ff; /* GitHub blue for links/active states (lighter for dark theme) */
+    --color-accent-blue-hover: #79c0ff; /* Even lighter blue on hover */
+    --color-input-bg: #2e2e2e; /* Search input background */
+    --color-input-border: #444444; /* Search input border */
+    --color-shadow-light: rgba(0, 0, 0, 0.4); /* Darker shadow */
+    --color-active-link-bg: #3a3a3a; /* Background for active sidebar link */
+    --color-active-link-text: #ffffff; /* Text color for active link */
+    --color-active-link-arrow: #58a6ff; /* Color for the active link arrow */
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    font-family: 'Inter', -apple-system, BlinkMacMacFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     line-height: 1.6;
     color: var(--color-text-primary);
-    background-color: var(--color-bg-primary); /* Ensure body background is primary white */
+    background-color: var(--color-bg-primary); /* Ensure body background is primary dark */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     font-size: 16px;
-    -webkit-font-smoothing: antialiased; /* Better text rendering */
+    -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
@@ -46,7 +47,7 @@ button {
 }
 
 .header-inner {
-    max-width: 1200px;
+    max-width: 1200px; /* Header content still has a max-width and is centered */
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -76,7 +77,7 @@ button {
 }
 
 .header-nav a:hover {
-    color: var(--color-accent-blue);
+    color: var(--color-accent-blue-hover);
     background-color: var(--color-bg-secondary);
 }
 
@@ -104,7 +105,7 @@ button {
 .header-search-mobile input:focus {
     border-color: var(--color-accent-blue);
     outline: none;
-    box-shadow: 0 0 0 0.15rem rgba(9, 105, 218, 0.25);
+    box-shadow: 0 0 0 0.15rem rgba(88, 166, 255, 0.25); /* Dark theme shadow */
 }
 .header-search-mobile .search-button {
     position: absolute;
@@ -119,7 +120,7 @@ button {
 .menu-toggle {
     display: none; /* Hidden by default on desktop */
     background-color: transparent;
-    border: 1px solid transparent; /* Add transparent border for consistent sizing */
+    border: 1px solid transparent;
     padding: 0.5rem;
     border-radius: 6px;
     cursor: pointer;
@@ -139,33 +140,37 @@ button {
 /* --- Main Layout --- */
 .main-layout {
     display: flex;
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1.5rem;
-    gap: 2rem;
-    flex: 1; /* Allow main layout to grow */
+    /* REMOVE max-width and margin: auto to make it hug the left */
+    /* max-width: 1200px; */
+    /* margin: 2rem auto; */
+    width: 100%; /* Take full width */
+    margin-top: 2rem; /* Consistent top margin */
+    padding: 0; /* Remove padding here as children will have it */
+    gap: 0; /* Remove gap here, sidebar and main content handle their own spacing */
+    flex: 1;
 }
 
 /* --- Sidebar (Desktop) --- */
 .sidebar {
-    width: 280px;
+    width: 300px; /* Slightly wider to match reference */
     flex-shrink: 0;
-    padding-right: 1.5rem;
+    padding: 0 1.5rem 1.5rem 2rem; /* Top, Right, Bottom, Left padding */
     border-right: 1px solid var(--color-border-light);
+    background-color: var(--color-bg-primary); /* Ensure sidebar background is primary dark */
     position: sticky;
-    top: 6rem; /* Adjust based on header height and main margin */
-    height: calc(100vh - 8rem); /* Adjust based on header and main margin */
+    top: 0; /* Changed to 0 so it sticks right below the header */
+    height: 100vh; /* Make it full height of viewport */
     overflow-y: auto;
-    background-color: var(--color-bg-primary); /* Ensure sidebar background is primary white */
+    z-index: 999; /* Below header, above overlay */
 
-    /* Styles for mobile menu drawer. Hidden by default on desktop. */
-    display: block; /* Default for desktop. Will be overridden for mobile */
-    transform: translateX(0); /* Default for desktop */
-    transition: none; /* No transition for desktop */
-    padding-left: 0; /* Reset for desktop */
+    /* For mobile menu drawer. Hidden by default on desktop. */
+    display: block;
+    transform: translateX(0);
+    transition: none;
 }
 
 .sidebar-header {
+    margin-top: 1rem; /* Space from top of sidebar scroll area */
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--color-border-light);
@@ -194,10 +199,10 @@ button {
 .sidebar-search input {
     width: 100%;
     padding: 0.6rem 1rem;
-    padding-left: 2.2rem; /* Space for search icon */
+    padding-left: 2.2rem;
     border: 1px solid var(--color-input-border);
     border-radius: 6px;
-    background-color: var(--color-input-bg);
+    background-color: var(--color-input-bg); /* Use specific input background */
     color: var(--color-text-primary);
     font-size: 0.9rem;
     transition: border-color 0.2s ease-in-out;
@@ -210,7 +215,7 @@ button {
 .sidebar-search input:focus {
     border-color: var(--color-accent-blue);
     outline: none;
-    box-shadow: 0 0 0 0.15rem rgba(9, 105, 218, 0.25);
+    box-shadow: 0 0 0 0.15rem rgba(88, 166, 255, 0.25);
 }
 
 .sidebar-search .search-button {
@@ -225,7 +230,7 @@ button {
 
 /* Sidebar Navigation (Collapsible Sections & Links) */
 .sidebar-nav ul {
-    margin-bottom: 1rem; /* Space between main sections of lists */
+    margin-bottom: 1rem;
 }
 
 .sidebar-nav ul:last-child {
@@ -241,7 +246,7 @@ button {
     letter-spacing: 0.05em;
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
-    padding: 0 0.5rem; /* Match sidebar link padding */
+    padding: 0 0.5rem;
 }
 
 /* Divider below category title */
@@ -254,24 +259,24 @@ button {
 .sidebar-link {
     display: flex;
     align-items: center;
-    padding: 0.5rem 0.75rem; /* Adjusted padding */
-    font-size: 0.95rem; /* Slightly larger for main links */
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
     font-weight: 400;
     color: var(--color-text-primary);
     border-radius: 6px;
-    position: relative; /* For active arrow positioning */
+    position: relative;
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
 .sidebar-link:hover {
-    background-color: var(--color-bg-secondary);
-    color: var(--color-accent-blue);
+    background-color: var(--color-bg-tertiary); /* Darker hover background */
+    color: var(--color-accent-blue-hover); /* Lighter blue on hover */
 }
 
 /* Active Sidebar Link (Home) */
 .sidebar-link.active {
-    background-color: var(--color-active-link-bg); /* Lighter grey for active */
-    color: var(--color-active-link-text); /* Keep text dark */
+    background-color: var(--color-active-link-bg); /* Darker grey for active */
+    color: var(--color-active-link-text); /* White text */
     font-weight: 500;
 }
 
@@ -290,21 +295,21 @@ button {
 
 /* Collapsible Section (Details/Summary) Styling */
 .sidebar-section {
-    margin-bottom: 0.25rem; /* Space between collapsible sections */
+    margin-bottom: 0.25rem;
 }
 
 .sidebar-section-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 0.75rem; /* Match sidebar link padding */
+    padding: 0.5rem 0.75rem;
     font-weight: 500;
     color: var(--color-text-primary);
     cursor: pointer;
     font-size: 0.95rem;
-    transition: color 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
     list-style: none; /* Hide default triangle/arrow */
-    border-radius: 6px; /* Match link border-radius */
+    border-radius: 6px;
 }
 /* Hide default summary marker across browsers */
 .sidebar-section-title::-webkit-details-marker {
@@ -315,8 +320,8 @@ button {
 }
 
 .sidebar-section-title:hover {
-    background-color: var(--color-bg-secondary);
-    color: var(--color-accent-blue);
+    background-color: var(--color-bg-tertiary);
+    color: var(--color-accent-blue-hover);
 }
 
 /* Custom dropdown arrow for summary */
@@ -333,11 +338,11 @@ button {
 }
 
 .sidebar-subsection-list {
-    margin-top: 0.25rem; /* Reduced margin */
-    padding-left: 1.5rem; /* Indent subsections further */
-    border-left: 1px solid var(--color-border-light); /* Vertical line for hierarchy */
-    margin-left: 0.75rem; /* Align vertical line */
-    padding-bottom: 0.5rem; /* Space at the bottom of the group */
+    margin-top: 0.25rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--color-border-light);
+    margin-left: 0.75rem;
+    padding-bottom: 0.5rem;
 }
 
 .sidebar-subsection-list li {
@@ -348,8 +353,12 @@ button {
 /* --- Main Content --- */
 .main-content {
     flex-grow: 1;
-    min-width: 0;
-    padding-left: 1.5rem;
+    min-width: 0; /* Allow content to shrink if needed */
+    padding: 2rem 2rem 2rem 3rem; /* Top, Right, Bottom, Left padding */
+    background-color: var(--color-bg-primary); /* Ensure content area is primary dark */
+    max-width: 900px; /* Content within its column has a max-width for readability */
+    margin: 0 auto; /* Center content within its column */
+    /* Removed padding-left from here as it's now part of overall padding */
 }
 
 .main-content h1 {
@@ -386,7 +395,7 @@ button {
 }
 
 .main-content pre {
-    background-color: var(--color-bg-secondary);
+    background-color: var(--color-bg-secondary); /* Darker background for code blocks */
     border-radius: 6px;
     padding: 1rem;
     overflow-x: auto;
@@ -394,14 +403,16 @@ button {
     font-size: 0.9rem;
     line-height: 1.45;
     margin-bottom: 1rem;
+    color: var(--color-text-primary); /* Ensure code text is white */
 }
 
 .main-content code {
     font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
     font-size: 0.85rem;
-    background-color: rgba(27, 31, 35, 0.05);
+    background-color: var(--color-bg-secondary); /* Match pre background for inline code */
     padding: 0.2rem 0.4rem;
     border-radius: 6px;
+    color: var(--color-text-primary); /* Ensure inline code text is white */
 }
 
 .edit-page-link {
@@ -410,7 +421,7 @@ button {
     gap: 0.5rem;
     padding: 0.6rem 1rem;
     background-color: var(--color-bg-secondary);
-    border: 1px solid var(--color-input-border); /* Changed to input border for consistency */
+    border: 1px solid var(--color-input-border);
     border-radius: 6px;
     font-size: 0.85rem;
     color: var(--color-text-secondary);
@@ -419,8 +430,8 @@ button {
 }
 
 .edit-page-link:hover {
-    background-color: #e5e8ea;
-    border-color: #c8ccd0;
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-border-light);
     color: var(--color-text-primary);
 }
 
@@ -432,36 +443,36 @@ button {
     text-align: center;
     color: var(--color-text-secondary);
     font-size: 0.85rem;
-    margin-top: auto; /* Push footer to the bottom */
+    margin-top: auto;
 }
 
 /* --- Mobile Menu Drawer & Responsiveness --- */
 @media (max-width: 992px) {
     .header-inner {
         justify-content: space-between;
-        gap: 0.5rem; /* Reduce gap on mobile */
+        gap: 0.5rem;
     }
 
     .header-nav {
-        display: none; /* Hide desktop nav */
+        display: none;
     }
 
     .header-search-mobile {
         display: flex; /* Show mobile header search */
         flex-grow: 1;
-        margin-right: 0; /* Remove right margin */
+        margin-right: 0;
     }
 
     .menu-toggle {
-        display: block; /* Show hamburger menu */
-        order: -1; /* Place toggle button first */
+        display: block;
+        order: -1;
     }
 
     /* Adjust main layout for mobile */
     .main-layout {
         flex-direction: column;
-        padding: 1rem;
-        margin-top: 1rem;
+        padding: 0; /* Reset for mobile */
+        margin-top: 1rem; /* Consistent top margin */
         gap: 0;
     }
 
@@ -470,18 +481,17 @@ button {
         position: fixed;
         top: 0;
         left: 0;
-        width: 80%; /* Width of the mobile drawer */
+        width: 80%;
         max-width: 320px;
         height: 100vh;
         overflow-y: auto;
         background-color: var(--color-bg-primary);
         border-right: 1px solid var(--color-border-light);
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-        z-index: 1002; /* Above overlay */
-        transform: translateX(-100%); /* Start off-screen */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4); /* Darker shadow for dark theme */
+        z-index: 1002;
+        transform: translateX(-100%);
         transition: transform 0.3s ease-in-out;
-        padding-top: 1rem; /* Initial padding for drawer */
-        padding-left: 1.5rem; /* Padding inside the drawer */
+        padding: 1rem 1.5rem 1.5rem 1.5rem; /* Adjusted padding for drawer */
     }
 
     .sidebar.is-open {
@@ -489,13 +499,13 @@ button {
     }
 
     .mobile-menu-overlay {
-        display: none; /* Hidden by default */
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.6); /* Darker overlay for dark theme */
         z-index: 1001;
     }
 
@@ -505,10 +515,16 @@ button {
 
     /* Hide desktop-specific sidebar search on mobile drawer */
     .sidebar-search {
-        display: none; /* Only header-search-mobile is active on mobile */
+        display: none;
     }
     
-    /* Ensure body doesn't scroll when mobile menu is open */
+    /* Main content on mobile - no fixed sidebar, full width */
+    .main-content {
+        max-width: 100%; /* Take full width on mobile */
+        padding: 1rem 1rem 2rem 1rem; /* Adjust padding for mobile */
+        margin: 0; /* Remove auto margin on mobile */
+    }
+
     body.no-scroll {
         overflow: hidden;
     }
