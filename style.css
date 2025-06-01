@@ -83,11 +83,11 @@ html {
 .header-inner {
     width: 100%;
     display: flex;
-    align-items: center; /* Vertically center items */
+    align-items: flex-start; /* Vertically center items */
    justify-content: flex-start; /* Align items to the left */
     gap: 1rem;
     padding: 10px 20px; /* Adjust padding as needed */
-  /*   position: relative;  For potential absolute positioning of children */
+    position: relative; /*  For potential absolute positioning of children */
 }
 
 .site-logo {
