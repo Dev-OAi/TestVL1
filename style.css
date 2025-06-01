@@ -1,24 +1,27 @@
 /* style.css */
 
 :root {
-    /* GitHub Docs Color Palette (approximate) */
-    --color-bg-primary: #ffffff;
-    --color-bg-secondary: #f6f8fa;
-    --color-text-primary: #24292f;
-    --color-text-secondary: #57606a;
-    --color-border-light: #d0d7de;
-    --color-accent-blue: #0969da;
-    --color-accent-blue-hover: #0550ae;
-    --color-input-bg: #f6f8fa;
-    --color-input-border: #d0d7de;
-    --color-shadow-light: rgba(140, 149, 159, 0.15);
+    /* GitHub Docs Color Palette (approximate, refined) */
+    --color-bg-primary: #ffffff; /* White background for page and header */
+    --color-bg-secondary: #f6f8fa; /* Light grey for subtle elements like footer/code blocks */
+    --color-text-primary: #24292f; /* Main dark text */
+    --color-text-secondary: #57606a; /* Muted grey text */
+    --color-border-light: #d0d7de; /* Light border color */
+    --color-accent-blue: #0969da; /* GitHub blue for links/active states */
+    --color-accent-blue-hover: #0550ae; /* Darker blue on hover */
+    --color-input-bg: #f6f8fa; /* Search input background */
+    --color-input-border: #d0d7de; /* Search input border */
+    --color-shadow-light: rgba(140, 149, 159, 0.15); /* For subtle shadows */
+    --color-active-link-bg: #e1e4e8; /* Background for active sidebar link (similar to GitHub's light mode) */
+    --color-active-link-text: #24292f; /* Text color for active link */
+    --color-active-link-arrow: #0969da; /* Color for the active link arrow */
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     line-height: 1.6;
     color: var(--color-text-primary);
-    background-color: var(--color-bg-primary);
+    background-color: var(--color-bg-primary); /* Ensure body background is primary white */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -80,10 +83,9 @@ button {
 /* Header Search (for mobile, hidden on desktop) */
 .header-search-mobile {
     position: relative;
-    display: flex;
+    display: none; /* Hidden by default on desktop, shown on mobile */
     align-items: center;
-    flex-grow: 1; /* Occupy remaining space */
-    margin-right: 1.5rem; /* Space before nav/menu toggle */
+    flex-grow: 1;
 }
 .header-search-mobile input {
     padding: 0.6rem 1rem;
@@ -93,7 +95,7 @@ button {
     background-color: var(--color-input-bg);
     color: var(--color-text-primary);
     font-size: 0.9rem;
-    width: 100%; /* Take full width of its container */
+    width: 100%;
     transition: border-color 0.2s ease-in-out;
 }
 .header-search-mobile input::placeholder {
@@ -144,7 +146,7 @@ button {
     flex: 1; /* Allow main layout to grow */
 }
 
-/* --- Sidebar --- */
+/* --- Sidebar (Desktop) --- */
 .sidebar {
     width: 280px;
     flex-shrink: 0;
@@ -154,6 +156,8 @@ button {
     top: 6rem; /* Adjust based on header height and main margin */
     height: calc(100vh - 8rem); /* Adjust based on header and main margin */
     overflow-y: auto;
+    background-color: var(--color-bg-primary); /* Ensure sidebar background is primary white */
+
     /* Styles for mobile menu drawer. Hidden by default on desktop. */
     display: block; /* Default for desktop. Will be overridden for mobile */
     transform: translateX(0); /* Default for desktop */
@@ -219,34 +223,88 @@ button {
 }
 
 
-/* Sidebar Navigation (Collapsible Sections) */
+/* Sidebar Navigation (Collapsible Sections & Links) */
 .sidebar-nav ul {
-    margin-bottom: 1rem; /* Space between main sections */
+    margin-bottom: 1rem; /* Space between main sections of lists */
 }
 
 .sidebar-nav ul:last-child {
     margin-bottom: 0;
 }
 
-.sidebar-section {
-    margin-bottom: 0.5rem; /* Space between collapsible sections */
+/* Category Titles (e.g., GitHub Pages, Quickstart) */
+.sidebar-category-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0 0.5rem; /* Match sidebar link padding */
 }
 
-.sidebar-section:last-child {
-    margin-bottom: 0;
+/* Divider below category title */
+.sidebar-divider {
+    border-top: 1px solid var(--color-border-light);
+    margin: 0.5rem 0;
+}
+
+/* Individual Sidebar Links (e.g., Home, or inside subsections) */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem; /* Adjusted padding */
+    font-size: 0.95rem; /* Slightly larger for main links */
+    font-weight: 400;
+    color: var(--color-text-primary);
+    border-radius: 6px;
+    position: relative; /* For active arrow positioning */
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.sidebar-link:hover {
+    background-color: var(--color-bg-secondary);
+    color: var(--color-accent-blue);
+}
+
+/* Active Sidebar Link (Home) */
+.sidebar-link.active {
+    background-color: var(--color-active-link-bg); /* Lighter grey for active */
+    color: var(--color-active-link-text); /* Keep text dark */
+    font-weight: 500;
+}
+
+/* Active Link Arrow */
+.sidebar-link.active .active-arrow {
+    position: absolute;
+    left: -8px; /* Adjust to place arrow outside the link box */
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid var(--color-active-link-arrow); /* Blue arrow */
+    transform: translateY(2px); /* Minor vertical adjustment */
+}
+
+
+/* Collapsible Section (Details/Summary) Styling */
+.sidebar-section {
+    margin-bottom: 0.25rem; /* Space between collapsible sections */
 }
 
 .sidebar-section-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 0; /* Adjust padding for summary */
+    padding: 0.5rem 0.75rem; /* Match sidebar link padding */
     font-weight: 500;
     color: var(--color-text-primary);
     cursor: pointer;
-    font-size: 1rem; /* Slightly larger for main sections */
+    font-size: 0.95rem;
     transition: color 0.15s ease-in-out;
     list-style: none; /* Hide default triangle/arrow */
+    border-radius: 6px; /* Match link border-radius */
 }
 /* Hide default summary marker across browsers */
 .sidebar-section-title::-webkit-details-marker {
@@ -257,6 +315,7 @@ button {
 }
 
 .sidebar-section-title:hover {
+    background-color: var(--color-bg-secondary);
     color: var(--color-accent-blue);
 }
 
@@ -274,33 +333,15 @@ button {
 }
 
 .sidebar-subsection-list {
-    margin-top: 0.5rem;
-    padding-left: 1rem; /* Indent subsections */
+    margin-top: 0.25rem; /* Reduced margin */
+    padding-left: 1.5rem; /* Indent subsections further */
     border-left: 1px solid var(--color-border-light); /* Vertical line for hierarchy */
-    margin-left: 0.5rem;
+    margin-left: 0.75rem; /* Align vertical line */
     padding-bottom: 0.5rem; /* Space at the bottom of the group */
 }
 
 .sidebar-subsection-list li {
     margin-bottom: 0.25rem;
-}
-
-.sidebar-subsection-list .sidebar-link {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.9rem;
-    color: var(--color-text-primary);
-}
-
-.sidebar-subsection-list .sidebar-link:hover {
-    background-color: var(--color-bg-secondary);
-    color: var(--color-accent-blue);
-}
-
-.sidebar-link.active {
-    background-color: var(--color-accent-blue);
-    color: var(--color-bg-primary);
-    font-weight: 500;
-    border-radius: 6px;
 }
 
 
@@ -369,7 +410,7 @@ button {
     gap: 0.5rem;
     padding: 0.6rem 1rem;
     background-color: var(--color-bg-secondary);
-    border: 1px solid var(--color-border-light);
+    border: 1px solid var(--color-input-border); /* Changed to input border for consistency */
     border-radius: 6px;
     font-size: 0.85rem;
     color: var(--color-text-secondary);
@@ -462,35 +503,28 @@ button {
         display: block;
     }
 
-    /* Hide desktop-specific sidebar elements on mobile drawer */
-    .sidebar-header,
+    /* Hide desktop-specific sidebar search on mobile drawer */
     .sidebar-search {
-        /* These elements will be inside the mobile drawer */
-        padding-right: 1.5rem; /* Add padding to content inside drawer */
+        display: none; /* Only header-search-mobile is active on mobile */
     }
     
-    /* On mobile, the main header search handles things, hide sidebar search */
-    .sidebar-search {
-        display: none;
-    }
-
     /* Ensure body doesn't scroll when mobile menu is open */
     body.no-scroll {
         overflow: hidden;
     }
 }
 
-/* Hide sidebar on very small screens to give more space for header-search-mobile */
+/* Hide header-search-mobile on very small screens to simplify header if needed */
 @media (max-width: 768px) {
     .header-search-mobile {
-        display: none; /* Hide header search on very small to simplify header */
+        display: none;
     }
     .header-inner {
-        justify-content: flex-start; /* Align logo and toggle to left */
+        justify-content: flex-start;
         gap: 1rem;
     }
     .site-logo {
-        flex-grow: 1; /* Allow logo to take more space */
+        flex-grow: 1;
         text-align: center;
     }
 }
