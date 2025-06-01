@@ -121,9 +121,10 @@ html {
 /* Main Header Search Box (Desktop) */
 .header-search {
     position: static; 
-    display: block;
+    display: flex-start;
     align-items: left;
     flex-grow: 1;
+    flex-shrink: 1;
      max-width: 400px;
    margin-left: auto;
     margin-right: auto;
