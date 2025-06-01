@@ -120,7 +120,7 @@ html {
 
 /* Main Header Search Box (Desktop) */
 .header-search {
-    position: static; 
+  /*  position: static; */
     display: flex-start;
     align-items: center;
     flex-grow: 1;
