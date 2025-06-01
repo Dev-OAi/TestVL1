@@ -121,11 +121,11 @@ html {
 /* Main Header Search Box (Desktop) */
 .header-search {
     position: static; 
-    display: flex;
-    align-items: left;
+    display: flex-start;
+    align-items: center;
     flex-grow: 1;
-    
-     max-width: 600px;
+    flex-shrink: 1;
+     max-width: 400px;
    margin-left: auto;
     margin-right: auto;
 }
@@ -149,7 +149,7 @@ html {
     box-shadow: 0 0 0 0.15rem rgba(88, 166, 255, 0.25);
 }
 .header-search .search-button {
-    position: absolute;
+    position: static;
     right: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
