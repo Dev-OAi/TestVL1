@@ -118,7 +118,7 @@ html {
 
 /* Main Header Search Box (Desktop) */
 .header-search {
-    position: relative;
+    position: sticky;
     display: flex;
     align-items: center;
     flex-grow: 1;
@@ -155,7 +155,7 @@ html {
 
 /* Hamburger menu for mobile */
 .menu-toggle {
-    display: none;
+    display: inline-block;
     background-color: transparent;
     border: 1px solid transparent;
     padding: 0.5rem;
@@ -561,7 +561,7 @@ html {
 
     .header-search,
     .header-version-selector {
-        display: none;
+       /*  display: none; */
     }
 
     .menu-toggle {
