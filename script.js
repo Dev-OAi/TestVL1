@@ -116,4 +116,174 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // --- Sidebar Search Functionality ---
+    const sidebarSearchInput = document.querySelector('.sidebar-search input');
+    const allSidebarLinks = document.querySelectorAll('.sidebar-nav .sidebar-link');
+    const allSidebarSections = document.querySelectorAll('.sidebar-nav .sidebar-section'); // li containing details
+    const allSidebarCategoryTitles = document.querySelectorAll('.sidebar-nav .sidebar-category-title');
+
+    // Store original text content of links to restore after search
+    const originalLinkTexts = new Map();
+    allSidebarLinks.forEach(link => {
+        originalLinkTexts.set(link, link.textContent);
+    });
+
+    // Helper function to highlight text
+    function highlightText(text, term) {
+        if (!term) return text;
+        const regex = new RegExp(`(${term})`, 'gi'); // 'gi' for global and case-insensitive
+        return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    if (sidebarSearchInput) {
+        // 1. Open mobile menu on focus if on mobile and sidebar is closed
+        sidebarSearchInput.addEventListener('focus', () => {
+            if (window.innerWidth <= 768 && !sidebar.classList.contains('is-open')) {
+                sidebar.classList.add('is-open');
+                mobileMenuOverlay.classList.add('is-visible');
+                body.classList.add('no-scroll');
+            }
+        });
+
+        // 2. Implement filtering and highlighting on input
+        sidebarSearchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+
+            if (searchTerm === '') {
+                // Reset all visibility and highlighting
+                allSidebarLinks.forEach(link => {
+                    link.innerHTML = originalLinkTexts.get(link); // Restore original text
+                    link.closest('li').style.display = ''; // Show parent li
+                });
+                allSidebarSections.forEach(section => {
+                    section.style.display = ''; // Show section li
+                    const details = section.querySelector('details');
+                    if (details) details.removeAttribute('open'); // Close details
+                });
+                allSidebarCategoryTitles.forEach(title => {
+                    title.style.display = ''; // Show category title
+                });
+                return;
+            }
+
+            const visibleSections = new Set(); // To track details elements that should be open/visible
+            const visibleCategories = new Set(); // To track h4 category titles that should be visible
+
+            allSidebarLinks.forEach(link => {
+                link.innerHTML = originalLinkTexts.get(link); // Reset highlighting before checking
+                const linkText = link.textContent.toLowerCase();
+                const parentLi = link.closest('li');
+                
+                if (linkText.includes(searchTerm)) {
+                    parentLi.style.display = ''; // Show the link's li
+                    link.innerHTML = highlightText(originalLinkTexts.get(link), searchTerm); // Apply highlighting
+
+                    // Mark parent details and category title for visibility
+                    const parentDetails = link.closest('details');
+                    if (parentDetails) visibleSections.add(parentDetails);
+
+                    const parentUlOfSection = link.closest('.sidebar-nav > ul');
+                    if (parentUlOfSection && parentUlOfSection.previousElementSibling && parentUlOfSection.previousElementSibling.classList.contains('sidebar-category-title')) {
+                        visibleCategories.add(parentUlOfSection.previousElementSibling);
+                    }
+                } else {
+                    parentLi.style.display = 'none'; // Hide the link's li
+                }
+            });
+
+            // Adjust visibility of sections (details) and category titles (h4)
+            allSidebarSections.forEach(section => {
+                const detailsElement = section.querySelector('details');
+                if (detailsElement) {
+                    if (visibleSections.has(detailsElement)) {
+                        section.style.display = ''; // Show the li.sidebar-section
+                        detailsElement.setAttribute('open', ''); // Open the details
+                    } else {
+                        section.style.display = 'none'; // Hide the li.sidebar-section
+                        detailsElement.removeAttribute('open'); // Ensure it's closed
+                    }
+                }
+            });
+
+            allSidebarCategoryTitles.forEach(title => {
+                if (visibleCategories.has(title)) {
+                    title.style.display = ''; // Show the h4
+                } else {
+                    title.style.display = 'none'; // Hide the h4
+                }
+            });
+        });
+    }
+
+    // --- Theme Settings Dropdown ---
+    const settingsToggle = document.querySelector('.settings-toggle');
+    const settingsDropdown = document.querySelector('.settings-dropdown');
+    const themeOptions = document.querySelectorAll('.theme-option');
+    const htmlEl = document.documentElement;
+
+    // Function to apply the theme
+    const applyTheme = (theme) => {
+        htmlEl.setAttribute('data-theme', theme);
+    };
+
+    // Function to update the active state in the dropdown
+    const updateActiveButton = (themeValue) => {
+        themeOptions.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.themeValue === themeValue);
+        });
+    };
+
+    if (settingsToggle && settingsDropdown) {
+        // Toggle dropdown visibility
+        settingsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isExpanded = settingsToggle.getAttribute('aria-expanded') === 'true';
+            settingsDropdown.hidden = isExpanded;
+            settingsToggle.setAttribute('aria-expanded', !isExpanded);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            if (settingsToggle.getAttribute('aria-expanded') === 'true') {
+                settingsDropdown.hidden = true;
+                settingsToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Handle theme selection
+        themeOptions.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const themeValue = button.dataset.themeValue;
+                localStorage.setItem('docs-theme', themeValue);
+                
+                if (themeValue === 'system') {
+                    applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                } else {
+                    applyTheme(themeValue);
+                }
+                updateActiveButton(themeValue);
+                
+                // Hide dropdown after selection
+                settingsDropdown.hidden = true;
+                settingsToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        // Apply theme on initial load
+        const savedTheme = localStorage.getItem('docs-theme') || 'system';
+        updateActiveButton(savedTheme);
+        if (savedTheme === 'system') {
+            applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        } else {
+            applyTheme(savedTheme);
+        }
+
+        // Listen for changes in system preference
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            if (localStorage.getItem('docs-theme') === 'system') {
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+    }
 });
