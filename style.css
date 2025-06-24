@@ -1,7 +1,36 @@
 /* style.css */
 
+/* --- CSS Reset --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+body, h1, h2, h3, p, ul, ol, li, button, input {
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+}
+ul, ol {
+    list-style: none;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: inherit;
+    font-family: inherit;
+}
+input {
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
 /* --- Global Variables --- */
-:root {
+html[data-theme="dark"] {
     /* GitHub Docs DARK Theme Color Palette (based on reference image) */
     --color-bg-primary: #0d1117; /* Dark background for body, header, sidebar */
     --color-bg-secondary: #161b22; /* Slightly lighter dark for code blocks, footer */
@@ -23,6 +52,118 @@
     --color-note-border: #315185; /* Border for note boxes */
     --header-height: 64px; /* Header height to match reference */
 }
+
+/* Light theme variables */
+html, /* Default to light theme */
+html[data-theme="light"] {
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f6f8fa;
+    --color-bg-tertiary: #f1f3f5;
+    --color-text-primary: #24292f;
+    --color-text-secondary: #57606a;
+    --color-border-light: #d0d7de;
+    --color-accent-blue: #0969da;
+    --color-accent-blue-hover: #0a7ffb;
+    --color-input-bg: #f6f8fa;
+    --color-input-border: #d0d7de;
+    --color-shadow-light: rgba(140, 149, 159, 0.3);
+    --color-active-link-bg: #f1f3f5;
+    --color-active-link-text: #24292f;
+    --color-active-link-arrow: #0969da;
+    --color-toc-active-blue: #0969da;
+    --color-toc-active-bg: rgba(9, 105, 218, 0.1);
+    --color-note-bg: #ddf4ff;
+    --color-note-border: #58a6ff;
+    --header-height: 64px;
+}
+
+/* --- Settings Dropdown --- */
+.settings-container {
+    position: relative;
+}
+
+.settings-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 6px;
+    background-color: transparent;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.settings-toggle:hover {
+    background-color: var(--color-bg-tertiary);
+}
+
+.settings-toggle[aria-expanded="true"] {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-input-border);
+}
+
+.settings-toggle svg {
+    stroke: var(--color-text-secondary);
+}
+
+.settings-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 210px; /* Adjusted width for horizontal buttons */
+    background-color: var(--color-bg-primary);
+    border: 1px solid var(--color-border-light);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px var(--color-shadow-light);
+    z-index: 1010;
+    padding: 8px;
+}
+
+.dropdown-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    padding: 4px 8px;
+    display: block;
+}
+
+.theme-options {
+    display: flex; /* This makes the list items horizontal */
+    gap: 4px;     /* This adds space between the buttons */
+}
+
+.theme-options li {
+    flex: 1 1 0; /* This makes each button take up equal space */
+}
+
+.theme-option {
+    width: 100%;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 13px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.theme-option:hover {
+    background-color: var(--color-bg-tertiary);
+}
+
+.theme-option.active {
+    /* This applies the semi-transparent background when active */
+    background-color: var(--color-toc-active-bg);
+}
+
+.theme-option.active::after {
+    content: '✔';
+    color: var(--color-accent-blue);
+    font-weight: bold;
+}
+
+
 
 /* --- Base Styles --- */
 body {
@@ -84,8 +225,14 @@ html {
     justify-content: space-between;
     height: 100%;
     padding: 0 16px;
-    max-width: 1280px;
-    margin: 0 auto;
+}
+
+/* New group for left-aligned header items */
+.header-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-start;
 }
 
 /* Hamburger Menu */
@@ -97,6 +244,12 @@ html {
     display: flex;
     align-items: center;
     margin-right: 8px;
+}
+
+@media (min-width: 769px) {
+    .menu-toggle {
+        display: none;
+    }
 }
 
 .menu-toggle svg {
@@ -116,14 +269,14 @@ html {
     font-weight: 600;
     color: var(--color-text-primary);
     flex-shrink: 0;
-    margin-right: 16px;
 }
 
 /* Header Search Box */
 .header-search {
     flex-grow: 1;
-    max-width: 600px;
-    margin: 0 auto;
+    flex-shrink: 1;
+    max-width: 800px;
+    margin: 0 16px;
     position: relative;
     display: flex;
     align-items: center;
@@ -177,7 +330,14 @@ html {
     background-color: transparent;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
-    margin-left: 8px;
+    margin-left: 16px;
+}
+
+/* Empty container to balance the flex layout */
+.header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .header-version-selector:hover {
@@ -223,6 +383,51 @@ html {
     font-size: 16px;
     font-weight: 600;
 }
+
+    /* Sidebar Search Box */
+    .sidebar-search {
+        position: relative;
+        margin-top: 16px;
+    }
+
+    .sidebar-search input {
+        width: 100%;
+        padding: 6px 10px 6px 32px; /* Space for icon on the left */
+        border: 1px solid var(--color-input-border);
+        border-radius: 6px;
+        background-color: var(--color-input-bg);
+        color: var(--color-text-primary);
+        font-size: 13px;
+        line-height: 20px;
+        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .sidebar-search input::placeholder {
+        color: var(--color-text-secondary);
+    }
+
+    .sidebar-search input:focus {
+        border-color: var(--color-accent-blue);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.25);
+    }
+
+    .sidebar-search .search-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--color-text-secondary);
+        pointer-events: none;
+    }
+
+    /* Highlight for search results */
+    .highlight {
+        background-color: rgba(88, 166, 255, 0.3); /* A light blue background */
+        color: var(--color-text-primary); /* Keep text color */
+        border-radius: 3px;
+        padding: 0 2px;
+    }
 
 /* Sidebar Navigation */
 .sidebar-nav {
@@ -274,7 +479,7 @@ html {
 }
 
 .sidebar-link.active {
-    background-color: var(--color-active-link-bg);
+    
     color: var(--color-active-link-text);
     font-weight: 500;
 }
@@ -648,6 +853,11 @@ html {
 }
 
 @media (max-width: 544px) {
+    .header-search {
+        /* Shrink the search bar on very small screens */
+        max-width: 180px;
+    }
+
     .header-search input {
         font-size: 12px;
         padding: 6px 24px 6px 8px;
@@ -661,4 +871,6 @@ html {
     .main-content {
         padding: 12px;
     }
+
+   
 }
