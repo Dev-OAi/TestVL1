@@ -52,35 +52,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Function to update active TOC link based on scroll position
         const updateActiveTOCLink = () => {
-            const scrollPosition = mainContent.scrollTop + mainContent.offsetTop; // Current scroll position relative to document top
-            const viewportHeight = mainContent.clientHeight;
+            const clientHeight = mainContent.clientHeight;
+            const scrollHeight = mainContent.scrollHeight;
+            const activationOffset = clientHeight * 0.3; // The "active" line, 30% from the top of the viewport
+            const scrollPosition = mainContent.scrollTop;
 
             let activeHeading = null;
 
-            // Iterate through headings to find the one currently in view
+            // Find the last heading that has been scrolled past the activation offset
             for (let i = headingOffsets.length - 1; i >= 0; i--) {
                 const heading = headingOffsets[i].element;
                 const headingTop = heading.offsetTop;
-                const headingBottom = headingTop + heading.offsetHeight;
 
-                // Check if heading is within the visible portion of the main content
-                // A common heuristic is to activate when 50% or more of the heading is in view
-                // or when its top edge crosses a certain threshold (e.g., 20% from top of main content)
-                if (headingTop < mainContent.scrollTop + (viewportHeight * 0.3) && headingBottom > mainContent.scrollTop) {
+                if (headingTop < scrollPosition + activationOffset) {
                     activeHeading = headingOffsets[i];
                     break;
                 }
             }
 
-            // Remove active class from all links
-            document.querySelectorAll('.toc-nav a').forEach(link => {
-                link.classList.remove('active');
-            });
-
-            // Add active class to the current active link
-            if (activeHeading) {
-                activeHeading.linkElement.classList.add('active');
+            // Add a fallback for the very last item. If scrolled to the bottom,
+            // ensure the last heading is the one that's active.
+            if (scrollHeight - scrollPosition - clientHeight < 5) { // 5px tolerance
+                if (headingOffsets.length > 0) {
+                    activeHeading = headingOffsets[headingOffsets.length - 1];
+                }
             }
+
+            // Update the 'active' class on all TOC links efficiently
+            headingOffsets.forEach(offset => {
+                if (offset === activeHeading) {
+                    offset.linkElement.classList.add('active');
+                } else {
+                    offset.linkElement.classList.remove('active');
+                }
+            });
         };
 
         // Add scroll event listener to the main-content area
